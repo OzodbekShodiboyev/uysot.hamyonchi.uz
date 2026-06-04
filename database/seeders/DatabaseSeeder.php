@@ -13,25 +13,25 @@ class DatabaseSeeder extends Seeder
         // ─── Foydalanuvchilar ─────────────────────────────
         User::create([
             'name'     => 'Admin',
-            'email'    => 'admin@uysotish.uz',
-            'phone'    => '+998 90 000 00 00',
-            'password' => Hash::make('Admin1234!'),
+            'email'    => 'ozodbekonline1@gmail.com',
+            'phone'    => '+998 50 571 70 71',
+            'password' => Hash::make('Dilyajan2$'),
             'role'     => 'admin',
         ]);
 
         User::create([
-            'name'     => 'Sardor Nazarov',
-            'email'    => 'sardor@uysotish.uz',
+            'name'     => 'Abbosbek Yo\'ldoshov',
+            'email'    => 'abbos@uysotish.uz',
             'phone'    => '+998 90 111 11 11',
             'password' => Hash::make('Manager123!'),
             'role'     => 'manager',
         ]);
 
         User::create([
-            'name'     => 'Dilnoza Yusupova',
-            'email'    => 'dilnoza@uysotish.uz',
+            'name'     => 'Malohat Karimova',
+            'email'    => 'malohat@uysotish.uz',
             'phone'    => '+998 91 222 22 22',
-            'password' => Hash::make('Manager123!'),
+            'password' => Hash::make('ManagerMalohat123!'),
             'role'     => 'manager',
         ]);
 
