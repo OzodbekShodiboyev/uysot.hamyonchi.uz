@@ -406,8 +406,7 @@ function openAddApartmentModal() {
         <div id="form-bulk" style="display:none">
             <div class="bg-blue-50 border border-blue-100 rounded-xl p-3 mb-4 text-xs text-blue-700">
                 <i class="fa-solid fa-circle-info mr-1"></i>
-                Har qavatda <strong>bitta</strong> xonadon yaratiladi.
-                Raqamlar ketma-ket: 1, 2, 3, 4...
+                Har qavatda bir nechta xonadon yaratiladi. Raqamlar ketma-ket bo'ladi.
             </div>
             <div class="grid grid-cols-2 gap-3 mb-4">
                 <div>
@@ -420,10 +419,17 @@ function openAddApartmentModal() {
                     <input id="b-floor-to" type="number" min="1" max="100" placeholder="9"
                            class="form-input" value="{{ $block->total_floors }}" oninput="previewNumbers()">
                 </div>
-                <div class="col-span-2">
+                <div>
+                    <label class="text-sm font-medium text-gray-700 block mb-1">
+                        Har qavatda nechta xonadon *
+                    </label>
+                    <input id="b-per-floor" type="number" min="1" max="20" placeholder="5"
+                           class="form-input" value="1" oninput="previewNumbers()">
+                </div>
+                <div>
                     <label class="text-sm font-medium text-gray-700 block mb-1">
                         Boshlang'ich raqam *
-                        <span class="text-gray-400 font-normal ml-1">— 1 dan boshlansa 1 kiriting</span>
+                        <span class="text-gray-400 font-normal" style="font-size:10px;">— birinchi xonadon raqami</span>
                     </label>
                     <input id="b-start" type="number" min="1" placeholder="1"
                            class="form-input" oninput="previewNumbers()">
@@ -486,23 +492,30 @@ function switchMode(mode) {
 }
 
 function previewNumbers() {
-    const from  = parseInt(document.getElementById('b-floor-from')?.value) || 0;
-    const to    = parseInt(document.getElementById('b-floor-to')?.value)   || 0;
-    const start = parseInt(document.getElementById('b-start')?.value)      || 0;
-    const prev  = document.getElementById('bulk-preview');
-    const nums  = document.getElementById('preview-numbers');
+    const from     = parseInt(document.getElementById('b-floor-from')?.value) || 0;
+    const to       = parseInt(document.getElementById('b-floor-to')?.value)   || 0;
+    const start    = parseInt(document.getElementById('b-start')?.value)      || 0;
+    const perFloor = parseInt(document.getElementById('b-per-floor')?.value)  || 1;
+    const prev = document.getElementById('bulk-preview');
+    const nums = document.getElementById('preview-numbers');
     if (!start || from < 1 || to < from) { prev?.classList.add('hidden'); return; }
-    const list = [];
+
+    const lines = [];
     let n = start;
-    for (let f = from; f <= to; f++, n++) list.push(n);
-    nums.textContent = list.join(', ');
+    for (let f = from; f <= to; f++) {
+        const floorNums = [];
+        for (let i = 0; i < perFloor; i++, n++) floorNums.push(n);
+        lines.push(`${f}-qavat: ${floorNums.join(', ')}`);
+    }
+    nums.innerHTML = lines.join('<br>');
     prev?.classList.remove('hidden');
 }
 
 async function submitBulk() {
-    const from   = parseInt(document.getElementById('b-floor-from')?.value);
-    const to     = parseInt(document.getElementById('b-floor-to')?.value);
-    const start  = parseInt(document.getElementById('b-start')?.value);
+    const from     = parseInt(document.getElementById('b-floor-from')?.value);
+    const to       = parseInt(document.getElementById('b-floor-to')?.value);
+    const start    = parseInt(document.getElementById('b-start')?.value);
+    const perFloor = parseInt(document.getElementById('b-per-floor')?.value) || 1;
     const rooms  = parseInt(document.getElementById('b-rooms')?.value);
     const area   = parseFloat(document.getElementById('b-area')?.value);
     const price  = parseFloat(document.getElementById('b-price')?.value);
@@ -525,6 +538,7 @@ async function submitBulk() {
             block_id: {{ $block->id }},
             floor_from: from, floor_to: to,
             number_start: start,
+            apts_per_floor: perFloor,
             rooms, area_total: area,
             total_price: price,
             price_podklyuch: pricep,

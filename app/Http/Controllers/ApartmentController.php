@@ -136,15 +136,16 @@ class ApartmentController extends Controller
         }
 
         $data = $request->validate([
-            'block_id'        => ['required', 'integer', 'exists:blocks,id'],
-            'floor_from'      => ['required', 'integer', 'min:1', 'max:100'],
-            'floor_to'        => ['required', 'integer', 'min:1', 'max:100', 'gte:floor_from'],
-            'number_start'    => ['required', 'integer', 'min:1'],
-            'entrance'        => ['nullable', 'integer', 'min:1'],
-            'rooms'           => ['required', 'integer', 'min:1', 'max:10'],
-            'area_total'      => ['required', 'numeric', 'min:10'],
-            'area_living'     => ['nullable', 'numeric', 'min:1'],
-            'area_kitchen'    => ['nullable', 'numeric', 'min:1'],
+            'block_id'          => ['required', 'integer', 'exists:blocks,id'],
+            'floor_from'        => ['required', 'integer', 'min:1', 'max:100'],
+            'floor_to'          => ['required', 'integer', 'min:1', 'max:100', 'gte:floor_from'],
+            'number_start'      => ['required', 'integer', 'min:1'],
+            'apts_per_floor'    => ['required', 'integer', 'min:1', 'max:20'],
+            'entrance'          => ['nullable', 'integer', 'min:1'],
+            'rooms'             => ['required', 'integer', 'min:1', 'max:10'],
+            'area_total'        => ['required', 'numeric', 'min:10'],
+            'area_living'       => ['nullable', 'numeric', 'min:1'],
+            'area_kitchen'      => ['nullable', 'numeric', 'min:1'],
             'total_price'          => ['required', 'numeric', 'min:1000'],
             'price_podklyuch'      => ['nullable', 'numeric', 'min:1000'],
             'price_karobka_full'   => ['nullable', 'numeric', 'min:1000'],
@@ -154,40 +155,43 @@ class ApartmentController extends Controller
 
         $created = [];
         $skipped = [];
-        $num = (int) $data['number_start'];
+        $num     = (int) $data['number_start'];
+        $perFloor = (int) $data['apts_per_floor'];
 
-        for ($floor = $data['floor_from']; $floor <= $data['floor_to']; $floor++, $num++) {
-            $number = (string) $num;
+        for ($floor = $data['floor_from']; $floor <= $data['floor_to']; $floor++) {
+            for ($i = 0; $i < $perFloor; $i++, $num++) {
+                $number = (string) $num;
 
-            $exists = Apartment::where('block_id', $data['block_id'])
-                ->where('number', $number)
-                ->exists();
+                $exists = Apartment::where('block_id', $data['block_id'])
+                    ->where('number', $number)
+                    ->exists();
 
-            if ($exists) {
-                $skipped[] = $number;
-                continue;
-            }
+                if ($exists) {
+                    $skipped[] = $number;
+                    continue;
+                }
 
-            $apt = Apartment::create([
-                'block_id'        => $data['block_id'],
-                'number'          => $number,
-                'floor'           => $floor,
-                'entrance'        => $data['entrance'] ?? 1,
-                'rooms'           => $data['rooms'],
-                'area_total'      => $data['area_total'],
-                'area_living'     => $data['area_living'] ?? null,
-                'area_kitchen'    => $data['area_kitchen'] ?? null,
-                'total_price'          => $data['total_price'],
-                'price_podklyuch'      => $data['price_podklyuch'] ?? null,
-                'price_karobka_full'   => $data['price_karobka_full'] ?? null,
-                'price_podklyuch_full' => $data['price_podklyuch_full'] ?? null,
-                'price_per_m2'    => $data['price_per_m2'] ?? null,
-                'renovation'      => 'none',
-                'status'          => 'free',
-            ]);
+                $apt = Apartment::create([
+                    'block_id'             => $data['block_id'],
+                    'number'               => $number,
+                    'floor'                => $floor,
+                    'entrance'             => $data['entrance'] ?? 1,
+                    'rooms'                => $data['rooms'],
+                    'area_total'           => $data['area_total'],
+                    'area_living'          => $data['area_living'] ?? null,
+                    'area_kitchen'         => $data['area_kitchen'] ?? null,
+                    'total_price'          => $data['total_price'],
+                    'price_podklyuch'      => $data['price_podklyuch'] ?? null,
+                    'price_karobka_full'   => $data['price_karobka_full'] ?? null,
+                    'price_podklyuch_full' => $data['price_podklyuch_full'] ?? null,
+                    'price_per_m2'         => $data['price_per_m2'] ?? null,
+                    'renovation'           => 'none',
+                    'status'               => 'free',
+                ]);
 
-            $created[] = $apt->number;
-        }
+                $created[] = $apt->number;
+            }  // inner for (apt per floor)
+        }  // outer for (floors)
 
         ActivityLog::log(
             'apartment.bulk_created',
