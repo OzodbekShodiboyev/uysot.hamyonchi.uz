@@ -80,23 +80,7 @@
     </div>
 
     {{-- Demo ma'lumotlar --}}
-    <div class="mt-4 bg-blue-50 border border-blue-100 rounded-xl p-4 text-xs text-blue-700">
-        <p class="font-semibold mb-2">Demo ma'lumotlar:</p>
-        <div class="space-y-1">
-            <div class="flex justify-between">
-                <span>Admin:</span>
-                <span class="font-mono">admin@uysotish.uz / Admin1234!</span>
-            </div>
-            <div class="flex justify-between">
-                <span>Menejer:</span>
-                <span class="font-mono">sardor@uysotish.uz / Manager123!</span>
-            </div>
-            <div class="flex justify-between">
-                <span>Hisobchi:</span>
-                <span class="font-mono">zafar@uysotish.uz / Accountant123!</span>
-            </div>
-        </div>
-    </div>
+    
 </div>
 
 </body>
