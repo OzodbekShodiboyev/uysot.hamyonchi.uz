@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem \"c:\\\\Users\\\\OZODBEK\\\\Downloads\\\\uy-sotish-laravel10-php81\\\\uy-sotish\" -Force)",
+      "Bash(Select-Object Name)",
+      "Bash(php -r ' *)",
+      "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\OZODBEK\\\\Downloads\\\\uy-sotish-laravel10-php81\\\\uy-sotish\" -Recurse -Directory)",
+      "Bash(Select-Object -ExpandProperty FullName)",
+      "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\OZODBEK\\\\Downloads\\\\uy-sotish-laravel10-php81\\\\uy-sotish\\\\database\\\\migrations\" -Name)",
+      "Bash(ls lang/)",
+      "Bash(dir lang *)",
+      "Bash(composer show *)"
+    ]
+  }
+}
