@@ -369,19 +369,28 @@ function openAddApartmentModal() {
                         <label class="text-sm font-medium text-gray-700 block mb-1">Maydon (m²) *</label>
                         <input name="area_total" type="number" step="0.01" min="10" class="form-input" required>
                     </div>
-                    <div>
-                        <label class="text-sm font-medium text-gray-700 block mb-1">
-                            <span class="w-2.5 h-2.5 bg-amber-400 rounded-full inline-block mr-1"></span>
-                            Karobka narxi *
-                        </label>
-                        <input name="total_price" type="number" step="1000" min="1000" class="form-input" required>
-                    </div>
-                    <div>
-                        <label class="text-sm font-medium text-gray-700 block mb-1">
-                            <span class="w-2.5 h-2.5 bg-emerald-500 rounded-full inline-block mr-1"></span>
-                            Podklyuch narxi
-                        </label>
-                        <input name="price_podklyuch" type="number" step="1000" min="1000" class="form-input" placeholder="(ixtiyoriy)">
+                    <div class="col-span-2">
+                        <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:10px;">
+                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                                <div style="background:#fffbeb;border-radius:8px;padding:8px;">
+                                    <label style="font-size:10px;color:#92400e;font-weight:700;display:block;margin-bottom:4px;">🟡 Karobka · 0–70% avans *</label>
+                                    <input name="total_price" type="number" step="1000" min="1000" placeholder="6 000 000" class="form-input" style="font-size:12px;padding:6px 10px;" required>
+                                </div>
+                                <div style="background:#ecfdf5;border-radius:8px;padding:8px;">
+                                    <label style="font-size:10px;color:#065f46;font-weight:700;display:block;margin-bottom:4px;">🟢 Podklyuch · 0–70% avans</label>
+                                    <input name="price_podklyuch" type="number" step="1000" min="1000" placeholder="6 500 000" class="form-input" style="font-size:12px;padding:6px 10px;">
+                                </div>
+                                <div style="background:#fffbeb;border-radius:8px;padding:8px;border:1.5px dashed #fbbf24;">
+                                    <label style="font-size:10px;color:#92400e;font-weight:700;display:block;margin-bottom:4px;">🟡 Karobka · 75–100% avans</label>
+                                    <input name="price_karobka_full" type="number" step="1000" min="1000" placeholder="5 000 000" class="form-input" style="font-size:12px;padding:6px 10px;">
+                                </div>
+                                <div style="background:#ecfdf5;border-radius:8px;padding:8px;border:1.5px dashed #34d399;">
+                                    <label style="font-size:10px;color:#065f46;font-weight:700;display:block;margin-bottom:4px;">🟢 Podklyuch · 75–100% avans</label>
+                                    <input name="price_podklyuch_full" type="number" step="1000" min="1000" placeholder="5 500 000" class="form-input" style="font-size:12px;padding:6px 10px;">
+                                </div>
+                            </div>
+                            <p style="font-size:10px;color:#94a3b8;margin:6px 0 0;">75–100% avans narxlari bo'sh qolsa, 0–70% narxi ishlatiladi</p>
+                        </div>
                     </div>
                 </div>
                 <div class="flex gap-3 justify-end">
@@ -427,19 +436,27 @@ function openAddApartmentModal() {
                     <label class="text-sm font-medium text-gray-700 block mb-1">Maydon (m²) *</label>
                     <input id="b-area" type="number" step="0.01" min="10" class="form-input">
                 </div>
-                <div>
-                    <label class="text-sm font-medium text-gray-700 block mb-1">
-                        <span class="w-2.5 h-2.5 bg-amber-400 rounded-full inline-block mr-1"></span>
-                        Karobka narxi *
-                    </label>
-                    <input id="b-price" type="number" step="1000" min="1000" class="form-input">
-                </div>
-                <div>
-                    <label class="text-sm font-medium text-gray-700 block mb-1">
-                        <span class="w-2.5 h-2.5 bg-emerald-500 rounded-full inline-block mr-1"></span>
-                        Podklyuch narxi
-                    </label>
-                    <input id="b-price-p" type="number" step="1000" min="1000" class="form-input" placeholder="(ixtiyoriy)">
+                <div class="col-span-2">
+                    <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:10px;">
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                            <div style="background:#fffbeb;border-radius:8px;padding:8px;">
+                                <label style="font-size:10px;color:#92400e;font-weight:700;display:block;margin-bottom:4px;">🟡 Karobka · 0–70% avans *</label>
+                                <input id="b-price" type="number" step="1000" min="1000" placeholder="6 000 000" class="form-input" style="font-size:12px;padding:6px 10px;">
+                            </div>
+                            <div style="background:#ecfdf5;border-radius:8px;padding:8px;">
+                                <label style="font-size:10px;color:#065f46;font-weight:700;display:block;margin-bottom:4px;">🟢 Podklyuch · 0–70% avans</label>
+                                <input id="b-price-p" type="number" step="1000" min="1000" placeholder="6 500 000" class="form-input" style="font-size:12px;padding:6px 10px;">
+                            </div>
+                            <div style="background:#fffbeb;border-radius:8px;padding:8px;border:1.5px dashed #fbbf24;">
+                                <label style="font-size:10px;color:#92400e;font-weight:700;display:block;margin-bottom:4px;">🟡 Karobka · 75–100% avans</label>
+                                <input id="b-price-kf" type="number" step="1000" min="1000" placeholder="5 000 000" class="form-input" style="font-size:12px;padding:6px 10px;">
+                            </div>
+                            <div style="background:#ecfdf5;border-radius:8px;padding:8px;border:1.5px dashed #34d399;">
+                                <label style="font-size:10px;color:#065f46;font-weight:700;display:block;margin-bottom:4px;">🟢 Podklyuch · 75–100% avans</label>
+                                <input id="b-price-pf" type="number" step="1000" min="1000" placeholder="5 500 000" class="form-input" style="font-size:12px;padding:6px 10px;">
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="col-span-2">
                     <div id="bulk-preview" class="text-xs text-gray-400 mt-1 hidden">
@@ -490,6 +507,8 @@ async function submitBulk() {
     const area   = parseFloat(document.getElementById('b-area')?.value);
     const price  = parseFloat(document.getElementById('b-price')?.value);
     const pricep = parseFloat(document.getElementById('b-price-p')?.value) || null;
+    const pricekf = parseFloat(document.getElementById('b-price-kf')?.value) || null;
+    const pricepf = parseFloat(document.getElementById('b-price-pf')?.value) || null;
 
     if (!from || !to || !start || !rooms || !area || !price) {
         showToast("Barcha majburiy maydonlarni to'ldiring!", 'error'); return;
@@ -509,6 +528,8 @@ async function submitBulk() {
             rooms, area_total: area,
             total_price: price,
             price_podklyuch: pricep,
+            price_karobka_full: pricekf,
+            price_podklyuch_full: pricepf,
         }),
     });
     const d = await res.json();

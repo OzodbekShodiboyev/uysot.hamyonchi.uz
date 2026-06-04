@@ -101,11 +101,13 @@ class ApartmentController extends Controller
         $data = $request->validate([
             'rooms'           => ['sometimes', 'integer', 'min:1', 'max:10'],
             'area_total'      => ['sometimes', 'numeric', 'min:10'],
-            'total_price'     => ['sometimes', 'numeric', 'min:1000'],
-            'price_podklyuch' => ['sometimes', 'nullable', 'numeric', 'min:1000'],
-            'renovation'      => ['sometimes', 'in:none,rough,full'],
-            'price_per_m2'    => ['sometimes', 'numeric', 'min:0'],
-            'notes'           => ['nullable', 'string'],
+            'total_price'          => ['sometimes', 'numeric', 'min:1000'],
+            'price_podklyuch'      => ['sometimes', 'nullable', 'numeric', 'min:1000'],
+            'price_karobka_full'   => ['sometimes', 'nullable', 'numeric', 'min:1000'],
+            'price_podklyuch_full' => ['sometimes', 'nullable', 'numeric', 'min:1000'],
+            'renovation'           => ['sometimes', 'in:none,rough,full'],
+            'price_per_m2'         => ['sometimes', 'numeric', 'min:0'],
+            'notes'                => ['nullable', 'string'],
         ]);
 
         $old = $apartment->only(array_keys($data));
@@ -143,9 +145,11 @@ class ApartmentController extends Controller
             'area_total'      => ['required', 'numeric', 'min:10'],
             'area_living'     => ['nullable', 'numeric', 'min:1'],
             'area_kitchen'    => ['nullable', 'numeric', 'min:1'],
-            'total_price'     => ['required', 'numeric', 'min:1000'],
-            'price_podklyuch' => ['nullable', 'numeric', 'min:1000'],
-            'price_per_m2'    => ['nullable', 'numeric', 'min:0'],
+            'total_price'          => ['required', 'numeric', 'min:1000'],
+            'price_podklyuch'      => ['nullable', 'numeric', 'min:1000'],
+            'price_karobka_full'   => ['nullable', 'numeric', 'min:1000'],
+            'price_podklyuch_full' => ['nullable', 'numeric', 'min:1000'],
+            'price_per_m2'         => ['nullable', 'numeric', 'min:0'],
         ]);
 
         $created = [];
@@ -173,8 +177,10 @@ class ApartmentController extends Controller
                 'area_total'      => $data['area_total'],
                 'area_living'     => $data['area_living'] ?? null,
                 'area_kitchen'    => $data['area_kitchen'] ?? null,
-                'total_price'     => $data['total_price'],
-                'price_podklyuch' => $data['price_podklyuch'] ?? null,
+                'total_price'          => $data['total_price'],
+                'price_podklyuch'      => $data['price_podklyuch'] ?? null,
+                'price_karobka_full'   => $data['price_karobka_full'] ?? null,
+                'price_podklyuch_full' => $data['price_podklyuch_full'] ?? null,
                 'price_per_m2'    => $data['price_per_m2'] ?? null,
                 'renovation'      => 'none',
                 'status'          => 'free',

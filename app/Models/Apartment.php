@@ -17,6 +17,7 @@ class Apartment extends Model
         'block_id', 'owner_id', 'number', 'floor', 'entrance',
         'rooms', 'area_total', 'area_living', 'area_kitchen',
         'renovation', 'price_per_m2', 'total_price', 'price_podklyuch',
+        'price_karobka_full', 'price_podklyuch_full',
         'status', 'reserved_until', 'reserved_by',
         'floor_plan_image', 'floor_plan_data', 'notes',
     ];
@@ -24,8 +25,10 @@ class Apartment extends Model
     protected $casts = [
         'floor_plan_data'  => 'array',
         'reserved_until'   => 'datetime',
-        'total_price'      => 'decimal:2',
-        'price_podklyuch'  => 'decimal:2',
+        'total_price'          => 'decimal:2',
+        'price_podklyuch'      => 'decimal:2',
+        'price_karobka_full'   => 'decimal:2',
+        'price_podklyuch_full' => 'decimal:2',
         'price_per_m2'     => 'decimal:2',
         'area_total'       => 'decimal:2',
         'area_living'      => 'decimal:2',

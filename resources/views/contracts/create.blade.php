@@ -51,7 +51,9 @@
                         @foreach($blk->apartments as $apt)
                         <option value="{{ $apt->id }}"
                                 data-price="{{ $apt->total_price }}"
-                                data-price-podklyuch="{{ $apt->price_podklyuch ?? '' }}">
+                                data-price-podklyuch="{{ $apt->price_podklyuch ?? '' }}"
+                                data-price-karobka-full="{{ $apt->price_karobka_full ?? '' }}"
+                                data-price-podklyuch-full="{{ $apt->price_podklyuch_full ?? '' }}">
                             {{ $apt->number }}-xonadon · {{ $apt->floor }}-qavat · {{ $apt->rooms }}x ·
                             {{ number_format($apt->total_price) }} so'm@if($apt->price_podklyuch) / {{ number_format($apt->price_podklyuch) }} so'm@endif
                         </option>
@@ -136,59 +138,67 @@
                 <h3 class="font-semibold text-sm mb-3 flex items-center gap-2">
                     <i class="fa-solid fa-paintbrush text-gray-400"></i> Ta'mir turi *
                 </h3>
+                {{-- Step 1: Ta'mir turi --}}
                 <div class="grid grid-cols-2 gap-3">
-
-                    {{-- Karobka --}}
-                    <label class="flex flex-col items-center gap-2 p-4 border-2 rounded-xl cursor-pointer transition"
-                           :class="renovationType === 'karobka'
-                                   ? 'border-amber-500 bg-amber-50'
-                                   : 'border-gray-200 hover:border-amber-200'">
+                    <label class="flex flex-col items-center gap-2 p-3 border-2 rounded-xl cursor-pointer transition"
+                           :class="renovationType === 'karobka' ? 'border-amber-500 bg-amber-50' : 'border-gray-200 hover:border-amber-200'">
                         <input type="radio" x-model="renovationType" value="karobka"
                                @change="selectRenovation('karobka')" class="sr-only">
-                        <div class="w-12 h-12 bg-amber-100 rounded-2xl flex items-center justify-center">
-                            <i class="fa-solid fa-cube text-amber-600 text-xl"></i>
+                        <div class="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center">
+                            <i class="fa-solid fa-cube text-amber-600 text-lg"></i>
                         </div>
                         <div class="text-center">
                             <p class="text-sm font-bold">Karobka</p>
-                            <p class="text-[11px] text-gray-400 mt-0.5">Ta'mirsiz / qo'pol</p>
-                            <p class="text-xs font-bold text-amber-700 mt-1.5"
-                               x-text="priceKarobka > 0 ? Number(priceKarobka).toLocaleString('uz-UZ') + &quot; so'm&quot; : '—'"></p>
+                            <p class="text-[10px] text-gray-400">Ta'mirsiz</p>
                         </div>
                         <div x-show="renovationType === 'karobka'"
-                             class="w-5 h-5 bg-amber-500 rounded-full flex items-center justify-center">
-                            <i class="fa-solid fa-check text-white text-xs"></i>
+                             class="w-4 h-4 bg-amber-500 rounded-full flex items-center justify-center">
+                            <i class="fa-solid fa-check text-white" style="font-size:8px"></i>
                         </div>
                     </label>
-
-                    {{-- Podklyuch --}}
-                    <label class="flex flex-col items-center gap-2 p-4 border-2 rounded-xl cursor-pointer transition"
-                           :class="renovationType === 'podklyuch'
-                                   ? 'border-emerald-500 bg-emerald-50'
-                                   : 'border-gray-200 hover:border-emerald-200'">
+                    <label class="flex flex-col items-center gap-2 p-3 border-2 rounded-xl cursor-pointer transition"
+                           :class="renovationType === 'podklyuch' ? 'border-emerald-500 bg-emerald-50' : 'border-gray-200 hover:border-emerald-200'">
                         <input type="radio" x-model="renovationType" value="podklyuch"
                                @change="selectRenovation('podklyuch')" class="sr-only">
-                        <div class="w-12 h-12 bg-emerald-100 rounded-2xl flex items-center justify-center">
-                            <i class="fa-solid fa-house-chimney text-emerald-600 text-xl"></i>
+                        <div class="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center">
+                            <i class="fa-solid fa-house-chimney text-emerald-600 text-lg"></i>
                         </div>
                         <div class="text-center">
                             <p class="text-sm font-bold">Podklyuch</p>
-                            <p class="text-[11px] text-gray-400 mt-0.5">Tayyor ta'mir</p>
-                            <p class="text-xs font-bold text-emerald-700 mt-1.5"
-                               x-text="pricePodklyuch > 0 ? Number(pricePodklyuch).toLocaleString('uz-UZ') + &quot; so'm&quot; : (priceKarobka > 0 ? Number(priceKarobka).toLocaleString('uz-UZ') + &quot; so'm&quot; : '—')"></p>
+                            <p class="text-[10px] text-gray-400">Tayyor ta'mir</p>
                         </div>
                         <div x-show="renovationType === 'podklyuch'"
-                             class="w-5 h-5 bg-emerald-500 rounded-full flex items-center justify-center">
-                            <i class="fa-solid fa-check text-white text-xs"></i>
+                             class="w-4 h-4 bg-emerald-500 rounded-full flex items-center justify-center">
+                            <i class="fa-solid fa-check text-white" style="font-size:8px"></i>
                         </div>
                     </label>
-
                 </div>
-                {{-- Alohida narx yo'q bo'lsa -- xabar --}}
-                <p x-show="pricePodklyuch <= 0 && priceKarobka > 0" x-cloak
-                   class="mt-2 text-xs text-gray-400 text-center">
-                    <i class="fa-solid fa-circle-info mr-1"></i>
-                    Podklyuch narxi alohida kiritilmagan — qo'lda o'zgartirishingiz mumkin
-                </p>
+
+                {{-- Step 2: Avans foizi (faqat alohida narx bor bo'lsa) --}}
+                <div x-show="renovationType && hasFullPrices()" x-cloak
+                     class="mt-3 border border-gray-100 rounded-xl p-3 bg-gray-50">
+                    <p class="text-xs font-semibold text-gray-500 mb-2">
+                        <i class="fa-solid fa-percent mr-1"></i> Boshlang'ich to'lov ulushi
+                    </p>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button type="button" @click="selectTier('low')"
+                                class="p-3 rounded-xl border-2 text-left transition"
+                                :class="priceTier==='low' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'">
+                            <p class="text-xs font-bold text-gray-700">0 – 70%</p>
+                            <p class="text-[10px] text-gray-400 mb-1">Bo'lib to'lash / kam avans</p>
+                            <p class="text-xs font-bold text-blue-700"
+                               x-text="(renovationType === 'podklyuch' ? (pricePodklyuch > 0 ? Number(pricePodklyuch).toLocaleString('uz-UZ') : '—') : Number(priceKarobka).toLocaleString('uz-UZ')) + &quot; so'm&quot;"></p>
+                        </button>
+                        <button type="button" @click="selectTier('high')"
+                                class="p-3 rounded-xl border-2 text-left transition"
+                                :class="priceTier==='high' ? 'border-emerald-500 bg-emerald-50' : 'border-gray-200 hover:border-gray-300'">
+                            <p class="text-xs font-bold text-gray-700">75 – 100%</p>
+                            <p class="text-[10px] text-gray-400 mb-1">Yuqori avans / to'liq</p>
+                            <p class="text-xs font-bold text-emerald-700"
+                               x-text="(renovationType === 'podklyuch' ? (pricePodklyuchFull > 0 ? Number(pricePodklyuchFull).toLocaleString('uz-UZ') : '—') : (priceKarobkaFull > 0 ? Number(priceKarobkaFull).toLocaleString('uz-UZ') : '—')) + &quot; so'm&quot;"></p>
+                        </button>
+                    </div>
+                </div>
             </div>
 
             {{-- To'lov turi --}}
@@ -372,9 +382,12 @@ function contractForm() {
         showHints:      false,
         submitting:     false,
         payMode:        'full',
-        renovationType: '',
-        priceKarobka:   {{ isset($apartment) ? (float)$apartment->total_price : 0 }},
-        pricePodklyuch: {{ isset($apartment) ? (float)($apartment->price_podklyuch ?? 0) : 0 }},
+        renovationType:     '',
+        priceTier:          '',   // 'low' = 0-70%, 'high' = 75-100%
+        priceKarobka:       {{ isset($apartment) ? (float)$apartment->total_price : 0 }},
+        pricePodklyuch:     {{ isset($apartment) ? (float)($apartment->price_podklyuch ?? 0) : 0 }},
+        priceKarobkaFull:   {{ isset($apartment) ? (float)($apartment->price_karobka_full ?? 0) : 0 }},
+        pricePodklyuchFull: {{ isset($apartment) ? (float)($apartment->price_podklyuch_full ?? 0) : 0 }},
 
         form: {
             apartment_id:           {{ isset($apartment) ? $apartment->id : 'null' }},
@@ -410,32 +423,57 @@ function contractForm() {
             };
         },
 
-        selectRenovation(type) {
-            this.renovationType = type;
-            if (type === 'podklyuch' && this.pricePodklyuch > 0) {
-                this.form.total_price = this.pricePodklyuch;
-            } else if (this.priceKarobka > 0) {
-                this.form.total_price = this.priceKarobka;
+        hasFullPrices() {
+            return this.priceKarobkaFull > 0 || this.pricePodklyuchFull > 0;
+        },
+
+        applyPrice() {
+            if (!this.renovationType) return;
+            const isHigh = this.priceTier === 'high';
+            if (this.renovationType === 'podklyuch') {
+                const full = this.pricePodklyuchFull;
+                const low  = this.pricePodklyuch;
+                this.form.total_price = (isHigh && full > 0) ? full : (low > 0 ? low : this.priceKarobka);
+            } else {
+                const full = this.priceKarobkaFull;
+                const low  = this.priceKarobka;
+                this.form.total_price = (isHigh && full > 0) ? full : low;
             }
             this.form.discount_amount = 0;
             this.calc();
         },
 
+        selectRenovation(type) {
+            this.renovationType = type;
+            // Agar faqat bir narx tier bo'lsa — avtomatik tanlash
+            if (!this.hasFullPrices()) this.priceTier = 'low';
+            this.applyPrice();
+        },
+
+        selectTier(tier) {
+            this.priceTier = tier;
+            this.applyPrice();
+        },
+
         onApartmentChange(e) {
             const opt = e.target.selectedOptions[0];
-            this.priceKarobka   = parseFloat(opt?.dataset.price ?? 0);
-            this.pricePodklyuch = parseFloat(opt?.dataset.pricePodklyuch ?? 0);
-            // Ta'mir turini tozalash — qayta tanlash kerak
-            this.renovationType    = '';
-            this.form.total_price  = 0;
+            this.priceKarobka       = parseFloat(opt?.dataset.price ?? 0);
+            this.pricePodklyuch     = parseFloat(opt?.dataset.pricePodklyuch ?? 0);
+            this.priceKarobkaFull   = parseFloat(opt?.dataset.priceKarobkaFull ?? 0);
+            this.pricePodklyuchFull = parseFloat(opt?.dataset.pricePodklyuchFull ?? 0);
+            this.renovationType     = '';
+            this.priceTier          = '';
+            this.form.total_price   = 0;
             this.form.discount_amount = 0;
             this.calc();
         },
 
         isValid() {
+            const needTier = this.hasFullPrices() && this.renovationType !== '';
             return this.form.apartment_id
                 && this.form.client_id
                 && this.renovationType !== ''
+                && (!needTier || this.priceTier !== '')
                 && this.form.total_price > 0
                 && (this.payMode === 'full' || this.form.installment_months > 0);
         },

@@ -51,7 +51,7 @@ class ContractController extends Controller
         $blocks   = Block::active()
             ->with(['apartments' => fn ($q) =>
                 $q->whereIn('status', ['free', 'reserved'])
-                  ->select('id', 'block_id', 'number', 'floor', 'rooms', 'area_total', 'total_price', 'price_podklyuch', 'status')
+                  ->select('id', 'block_id', 'number', 'floor', 'rooms', 'area_total', 'total_price', 'price_podklyuch', 'price_karobka_full', 'price_podklyuch_full', 'status')
                   ->orderBy('floor')
                   ->orderBy('number')
             ])

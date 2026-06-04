@@ -24,10 +24,12 @@ class StoreApartmentRequest extends FormRequest
             'area_living'  => ['nullable', 'numeric', 'min:1'],
             'area_kitchen' => ['nullable', 'numeric', 'min:1'],
             'renovation'   => ['nullable', 'in:none,rough,full'],
-            'price_per_m2'    => ['nullable', 'numeric', 'min:0'],
-            'total_price'     => ['required', 'numeric', 'min:1000'],
-            'price_podklyuch' => ['nullable', 'numeric', 'min:1000'],
-            'notes'           => ['nullable', 'string', 'max:2000'],
+            'price_per_m2'         => ['nullable', 'numeric', 'min:0'],
+            'total_price'          => ['required', 'numeric', 'min:1000'],
+            'price_podklyuch'      => ['nullable', 'numeric', 'min:1000'],
+            'price_karobka_full'   => ['nullable', 'numeric', 'min:1000'],
+            'price_podklyuch_full' => ['nullable', 'numeric', 'min:1000'],
+            'notes'                => ['nullable', 'string', 'max:2000'],
         ];
     }
 }
