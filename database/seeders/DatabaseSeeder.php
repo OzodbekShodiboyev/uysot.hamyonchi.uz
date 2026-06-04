@@ -111,11 +111,10 @@ class DatabaseSeeder extends Seeder
 
     private function randomStatus(): string
     {
-        // Taxminan: 50% bo'sh, 15% band, 10% bron, 25% sotilgan
+        // Taxminan: 50% bo'sh, 20% band, 30% sotilgan
         $statuses = [
             'free', 'free', 'free', 'free', 'free',
             'reserved', 'reserved',
-            'booked',
             'sold', 'sold', 'sold',
         ];
         return $statuses[array_rand($statuses)];
