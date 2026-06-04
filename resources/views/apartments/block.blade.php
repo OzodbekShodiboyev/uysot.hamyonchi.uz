@@ -19,87 +19,90 @@
 @endsection
 
 @section('content')
-<div class="flex gap-5" x-data="blockPage()">
+<div style="display:flex; gap:18px;" x-data="blockPage()">
 
 {{-- ── Chap: blok ko'rinishi ──────────────────────────────────── --}}
-<div class="flex-1 min-w-0 space-y-4">
+<div style="flex:1; min-width:0; display:flex; flex-direction:column; gap:14px;">
 
-    {{-- Statistika --}}
-    @php
-    $statCards = [
-        ['key'=>'free',    'label'=>"Bo'sh",   'text'=>'text-emerald-700','bg'=>'bg-emerald-50','border'=>'border-emerald-300'],
-        ['key'=>'reserved','label'=>'Band',    'text'=>'text-amber-700',  'bg'=>'bg-amber-50',  'border'=>'border-amber-300'],
-        ['key'=>'sold',    'label'=>'Sotilgan','text'=>'text-red-700',    'bg'=>'bg-red-50',    'border'=>'border-red-300'],
-        ['key'=>'total',   'label'=>'Jami',    'text'=>'text-gray-700',   'bg'=>'bg-gray-100',  'border'=>'border-gray-300'],
-    ];
-    @endphp
-    <div class="grid grid-cols-4 gap-3">
-    @foreach($statCards as $s)
-    @php
-        $pct = $stats['total'] > 0 && $s['key'] !== 'total'
-            ? round($stats[$s['key']] / $stats['total'] * 100) : null;
-    @endphp
-    <div class="card p-3 text-center border-t-2 {{ $s['border'] }}">
-        <p class="text-xs text-gray-500 mb-1">{{ $s['label'] }}</p>
-        <p class="text-xl font-bold {{ $s['text'] }}">{{ $stats[$s['key']] }}</p>
-        @if($pct !== null)
-        <p class="text-[10px] text-gray-400 mt-0.5">{{ $pct }}%</p>
-        @else
-        <p class="text-[10px] text-gray-400 mt-0.5">xonadon</p>
-        @endif
-    </div>
-    @endforeach
-    </div>
+    {{-- Stat + Nav qatori --}}
+    <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
 
-    {{-- Blok navigatsiyasi --}}
-    <div class="flex gap-2 flex-wrap">
-    @foreach($blocks as $blk)
-    <a href="{{ route('apartments.block', $blk) }}"
-       class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-sm font-medium transition
-              {{ $blk->id === $block->id
-                 ? 'border-2 font-semibold'
-                 : 'border-gray-200 text-gray-600 hover:border-gray-300' }}"
-       style="{{ $blk->id === $block->id
-                 ? 'border-color:'.$blk->color.';color:'.$blk->color
-                 : '' }}">
-        <span class="w-2.5 h-2.5 rounded-full" style="background:{{ $blk->color }}"></span>
-        {{ $blk->name }}
-    </a>
-    @endforeach
+        {{-- Stat kartochkalar --}}
+        @php
+        $sc = [
+            ['key'=>'free',    'label'=>"Bo'sh",   'color'=>'#059669','bg'=>'#ecfdf5'],
+            ['key'=>'reserved','label'=>'Band',    'color'=>'#d97706','bg'=>'#fffbeb'],
+            ['key'=>'sold',    'label'=>'Sotilgan','color'=>'#dc2626','bg'=>'#fef2f2'],
+            ['key'=>'total',   'label'=>'Jami',    'color'=>'#475569','bg'=>'#f8fafc'],
+        ];
+        @endphp
+        @foreach($sc as $s)
+        @php $pct = ($s['key'] !== 'total' && $stats['total'] > 0) ? round($stats[$s['key']]/$stats['total']*100) : null; @endphp
+        <div style="background:{{ $s['bg'] }}; border:1px solid {{ $s['color'] }}22;
+                    border-radius:12px; padding:10px 16px; text-align:center; min-width:80px;">
+            <div style="font-size:20px; font-weight:700; color:{{ $s['color'] }}; line-height:1;">
+                {{ $stats[$s['key']] }}
+            </div>
+            <div style="font-size:10.5px; color:{{ $s['color'] }}; opacity:.8; margin-top:2px; white-space:nowrap;">
+                {{ $s['label'] }}{{ $pct !== null ? ' · '.$pct.'%' : '' }}
+            </div>
+        </div>
+        @endforeach
+
+        <div style="flex:1;"></div>
+
+        {{-- Blok navigatsiyasi --}}
+        <div style="display:flex; gap:6px; flex-wrap:wrap;">
+        @foreach($blocks as $blk)
+        <a href="{{ route('apartments.block', $blk) }}"
+           style="display:inline-flex; align-items:center; gap:6px; padding:6px 12px;
+                  border-radius:8px; font-size:12.5px; font-weight:{{ $blk->id === $block->id ? '700' : '500' }};
+                  text-decoration:none; border:1.5px solid;
+                  transition:box-shadow .15s;
+                  border-color:{{ $blk->id === $block->id ? $blk->color : '#e2e8f0' }};
+                  color:{{ $blk->id === $block->id ? $blk->color : '#64748b' }};
+                  background:{{ $blk->id === $block->id ? $blk->color.'12' : '#fff' }};">
+            <span style="width:8px; height:8px; border-radius:50%; background:{{ $blk->color }}; flex-shrink:0;"></span>
+            {{ $blk->name }}
+        </a>
+        @endforeach
+        </div>
     </div>
 
     {{-- Rang legendasi --}}
-    <div class="flex items-center gap-4 flex-wrap text-xs">
-        <span class="text-gray-400 font-medium">Holat:</span>
-        @foreach(['free'=>"Bo'sh",'reserved'=>'Band','sold'=>'Sotilgan','unavailable'=>'Mavjud emas'] as $st=>$lb)
-        <div class="flex items-center gap-1.5">
-            <span class="w-4 h-4 rounded apt-{{ $st }} border inline-flex items-center justify-center">
-            </span>
-            <span class="text-gray-600">{{ $lb }}</span>
+    <div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap;">
+        <span style="font-size:11px; color:#94a3b8; font-weight:600; text-transform:uppercase; letter-spacing:.05em;">Holat:</span>
+        @foreach(['free'=>["Bo'sh",'#059669','#ecfdf5'],'reserved'=>['Band','#d97706','#fffbeb'],'sold'=>['Sotilgan','#dc2626','#fef2f2'],'unavailable'=>['Mavjud emas','#94a3b8','#f8fafc']] as $st=>[$lb,$clr,$bg])
+        <div style="display:flex; align-items:center; gap:5px; font-size:11.5px; color:#64748b;">
+            <span class="apt-cell apt-{{ $st }}" style="width:28px; height:20px; border-radius:5px; display:inline-block;"></span>
+            {{ $lb }}
         </div>
         @endforeach
     </div>
 
-    {{-- Qavatlar jadvali --}}
-    <div class="card overflow-hidden">
+    {{-- Qavatlar --}}
+    <div class="card" style="overflow:hidden;">
         @foreach($floors as $floor)
-        <div class="flex items-start gap-3 px-4 py-3 border-b border-gray-50 last:border-b-0
-                    hover:bg-gray-50/50 transition">
-            <div class="w-14 pt-1.5 flex-shrink-0">
-                <span class="text-xs font-semibold text-gray-400 bg-gray-100 px-2 py-1 rounded-lg">
-                    {{ $floor }}-qavat
+        <div style="display:flex; align-items:flex-start; gap:10px; padding:10px 16px;
+                    border-bottom:1px solid #f8fafc; transition:background .15s;"
+             onmouseover="this.style.background='#fafafa'"
+             onmouseout="this.style.background=''">
+            <div style="width:52px; padding-top:6px; flex-shrink:0;">
+                <span style="font-size:11px; font-weight:600; color:#94a3b8; background:#f1f5f9;
+                             padding:3px 8px; border-radius:7px; display:inline-block;">
+                    {{ $floor }}-q
                 </span>
             </div>
-            <div class="flex flex-wrap gap-2">
+            <div style="display:flex; flex-wrap:wrap; gap:7px;">
                 @foreach($apartments[$floor]->sortBy('number') as $apt)
-                <div class="apt-cell apt-{{ $apt->status }} border rounded-xl
-                            px-3 py-2 min-w-[68px] text-center select-none"
+                <div class="apt-cell apt-{{ $apt->status }}"
+                     style="padding:7px 10px; min-width:65px; text-align:center;"
                      data-apt-id="{{ $apt->id }}"
                      data-status="{{ $apt->status }}"
                      @click="selectApartment({{ $apt->id }})">
-                    <div class="text-xs font-bold">{{ $apt->number }}</div>
-                    <div class="text-[10px] opacity-70 mt-0.5">{{ $apt->rooms }}x · {{ $apt->area_total }}m²</div>
-                    <div class="text-[10px] font-semibold mt-0.5" data-status-label>
+                    <div style="font-size:12px; font-weight:700; line-height:1.2;">{{ $apt->number }}</div>
+                    <div style="font-size:9.5px; opacity:.65; margin-top:2px;">{{ $apt->rooms }}x·{{ $apt->area_total }}m²</div>
+                    <div style="font-size:9.5px; font-weight:600; margin-top:1px;" data-status-label>
                         {{ $apt->status_label }}
                     </div>
                 </div>
@@ -111,8 +114,8 @@
 </div>
 
 {{-- ── O'ng: tafsilot paneli ───────────────────────────────────── --}}
-<div class="w-80 flex-shrink-0" x-show="panelOpen" x-cloak>
-    <div class="card sticky top-0 overflow-hidden" id="apt-detail-panel">
+<div style="width:296px; flex-shrink:0;" x-show="panelOpen" x-cloak>
+    <div class="card" style="position:sticky; top:0; overflow:hidden;" id="apt-detail-panel">
         {{-- Panel JS tomonidan to'ldiriladi --}}
         <div class="p-8 text-center text-gray-400">
             <i class="fa-solid fa-home text-3xl block mb-2"></i>
@@ -155,46 +158,56 @@ function blockPage() {
             const c     = apt.active_contract;
             const block = apt.block;
 
-            const statusCls = {
-                free: 'bg-emerald-100 text-emerald-800',
-                reserved: 'bg-amber-100 text-amber-800',
-                sold: 'bg-red-100 text-red-800',
-                unavailable: 'bg-gray-100 text-gray-700',
-            }[apt.status] ?? 'bg-gray-100 text-gray-700';
+            const statusStyle = {
+                free:        'background:#ecfdf5;color:#065f46;',
+                reserved:    'background:#fffbeb;color:#92400e;',
+                sold:        'background:#fef2f2;color:#7f1d1d;',
+                unavailable: 'background:#f8fafc;color:#475569;',
+            }[apt.status] ?? 'background:#f8fafc;color:#475569;';
 
-            const renovLabels = { none: "Ta'mirsiz", rough: "Qo'pol ta'mir", full: "Tayyor ta'mir" };
+            const fmt = n => Number(n).toLocaleString('uz-UZ');
 
             let html = `
-            <div class="px-4 py-3.5 border-b border-gray-100 flex items-center justify-between">
+            <div style="padding:14px 16px; border-bottom:1px solid #f1f5f9;
+                        display:flex; align-items:center; justify-content:space-between;">
                 <div>
-                    <p class="font-bold">${apt.number}-xonadon</p>
-                    <p class="text-xs text-gray-500">${block.name} · ${apt.floor}-qavat · ${apt.entrance}-pod.</p>
+                    <p style="font-weight:700; font-size:15px; margin:0; color:#0f172a;">
+                        #${apt.number} xonadon
+                    </p>
+                    <p style="font-size:11px; color:#94a3b8; margin:2px 0 0;">
+                        ${block.name} · ${apt.floor}-qavat
+                    </p>
                 </div>
                 <button @click="panelOpen=false;selectedId=null"
-                        class="text-gray-400 hover:text-gray-600 transition">
-                    <i class="fa-solid fa-xmark text-lg"></i>
+                        style="background:none;border:none;cursor:pointer;color:#94a3b8;
+                               padding:6px;border-radius:8px;transition:color .15s,background .15s;"
+                        onmouseover="this.style.background='#f1f5f9';this.style.color='#374151'"
+                        onmouseout="this.style.background='none';this.style.color='#94a3b8'">
+                    <i class="fa-solid fa-xmark" style="font-size:16px;"></i>
                 </button>
             </div>
 
-            <div class="px-4 py-3 border-b border-gray-50">
-                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${statusCls}">
+            <div style="padding:10px 16px; border-bottom:1px solid #f8fafc;">
+                <span style="${statusStyle} padding:4px 12px; border-radius:99px;
+                             font-size:11.5px; font-weight:600; display:inline-block;">
                     ${apt.status_label}
                 </span>
             </div>
 
-            <div class="px-4 py-3 border-b border-gray-50">
-                <div class="grid grid-cols-2 gap-2">
+            <div style="padding:12px 16px; border-bottom:1px solid #f8fafc;">
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
                     ${[
                         ['Xonalar', apt.rooms + ' xona'],
                         ['Maydon', apt.area_total + ' m²'],
-                        ['Karobka', Number(apt.total_price).toLocaleString('uz-UZ') + " so'm"],
+                        ['Karobka narx', fmt(apt.total_price) + " so'm"],
                         apt.price_podklyuch
-                            ? ['Podklyuch', Number(apt.price_podklyuch).toLocaleString('uz-UZ') + " so'm"]
-                            : ['Ta\'mir', renovLabels[apt.renovation] ?? apt.renovation],
+                            ? ['Podklyuch narx', fmt(apt.price_podklyuch) + " so'm"]
+                            : ['Ta\'mir', {none:"Ta'mirsiz",rough:"Qo'pol",full:"Tayyor"}[apt.renovation]||apt.renovation],
                     ].map(([k,v]) => `
-                        <div class="bg-gray-50 rounded-lg p-2.5">
-                            <p class="text-[10px] text-gray-400 mb-0.5">${k}</p>
-                            <p class="text-sm font-semibold">${v}</p>
+                        <div style="background:#f8fafc; border-radius:9px; padding:9px 10px;
+                                    border:1px solid #f1f5f9;">
+                            <p style="font-size:10px; color:#94a3b8; margin:0 0 3px; font-weight:500;">${k}</p>
+                            <p style="font-size:12.5px; font-weight:600; color:#0f172a; margin:0;">${v}</p>
                         </div>
                     `).join('')}
                 </div>
@@ -271,6 +284,24 @@ function blockPage() {
                     <i class="fa-solid fa-file-contract"></i> Shartnomani ko'rish
                 </a>`;
             }
+
+            @if(auth()->user()->isAdmin())
+            // Admin: tahrirlash va o'chirish
+            html += `
+            <div class="flex gap-2 pt-1 border-t border-gray-100 mt-1">
+                <button onclick="openEditApartmentModal(${JSON.stringify(apt).replace(/"/g, '&quot;')})"
+                        class="flex-1 flex items-center justify-center gap-1.5 border border-gray-200
+                               text-gray-600 py-2 rounded-xl text-xs font-medium hover:bg-gray-50 transition">
+                    <i class="fa-solid fa-pen-to-square"></i> Tahrirlash
+                </button>
+                <button onclick="deleteApartment(${apt.id}, '${apt.number}')"
+                        class="flex-1 flex items-center justify-center gap-1.5 border border-red-200
+                               text-red-600 py-2 rounded-xl text-xs font-medium hover:bg-red-50 transition">
+                    <i class="fa-solid fa-trash"></i> O'chirish
+                </button>
+            </div>`;
+            @endif
+
             html += `</div>`;
 
             document.getElementById('apt-detail-panel').innerHTML = html;
@@ -294,64 +325,285 @@ async function releaseApt(id) {
 
 function openAddApartmentModal() {
     openModal(`
-    <div class="p-6">
-        <div class="flex items-center justify-between mb-5">
-            <h3 class="text-lg font-bold">Yangi xonadon qo'shish</h3>
+    <div class="p-6" style="min-width:520px">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-bold">Xonadon qo'shish</h3>
             <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600 text-xl">
                 <i class="fa-solid fa-xmark"></i>
             </button>
         </div>
-        <form action="{{ route('apartments.store') }}" method="POST">
-            @csrf
-            <input type="hidden" name="block_id" value="{{ $block->id }}">
-            <input type="hidden" name="entrance" value="1">
-            <input type="hidden" name="renovation" value="none">
-            <div class="grid grid-cols-2 gap-4 mb-4">
+
+        {{-- Rejim tanlash --}}
+        <div class="flex gap-2 mb-5 bg-gray-100 p-1 rounded-xl">
+            <button onclick="switchMode('single')" id="mode-single"
+                    class="flex-1 py-2 rounded-lg text-sm font-semibold transition bg-white shadow text-gray-800">
+                <i class="fa-solid fa-square mr-1.5"></i> Bitta xonadon
+            </button>
+            <button onclick="switchMode('bulk')" id="mode-bulk"
+                    class="flex-1 py-2 rounded-lg text-sm font-semibold transition text-gray-500 hover:text-gray-700">
+                <i class="fa-solid fa-layer-group mr-1.5"></i> Ko'p qavatlar
+            </button>
+        </div>
+
+        {{-- BITTA XONADON --}}
+        <div id="form-single">
+            <form action="{{ route('apartments.store') }}" method="POST">
+                @csrf
+                <input type="hidden" name="block_id" value="{{ $block->id }}">
+                <input type="hidden" name="entrance" value="1">
+                <input type="hidden" name="renovation" value="none">
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <div>
+                        <label class="text-sm font-medium text-gray-700 block mb-1">Xonadon raqami *</label>
+                        <input name="number" type="text" placeholder="101" class="form-input" required>
+                    </div>
+                    <div>
+                        <label class="text-sm font-medium text-gray-700 block mb-1">Qavat *</label>
+                        <input name="floor" type="number" min="1" max="100" class="form-input" required>
+                    </div>
+                    <div>
+                        <label class="text-sm font-medium text-gray-700 block mb-1">Xonalar soni *</label>
+                        <input name="rooms" type="number" min="1" max="10" class="form-input" required>
+                    </div>
+                    <div>
+                        <label class="text-sm font-medium text-gray-700 block mb-1">Maydon (m²) *</label>
+                        <input name="area_total" type="number" step="0.01" min="10" class="form-input" required>
+                    </div>
+                    <div>
+                        <label class="text-sm font-medium text-gray-700 block mb-1">
+                            <span class="w-2.5 h-2.5 bg-amber-400 rounded-full inline-block mr-1"></span>
+                            Karobka narxi *
+                        </label>
+                        <input name="total_price" type="number" step="1000" min="1000" class="form-input" required>
+                    </div>
+                    <div>
+                        <label class="text-sm font-medium text-gray-700 block mb-1">
+                            <span class="w-2.5 h-2.5 bg-emerald-500 rounded-full inline-block mr-1"></span>
+                            Podklyuch narxi
+                        </label>
+                        <input name="price_podklyuch" type="number" step="1000" min="1000" class="form-input" placeholder="(ixtiyoriy)">
+                    </div>
+                </div>
+                <div class="flex gap-3 justify-end">
+                    <button type="button" onclick="closeModal()" class="btn-secondary">Bekor</button>
+                    <button type="submit" class="btn-primary">
+                        <i class="fa-solid fa-plus"></i> Qo'shish
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        {{-- KO'P QAVATLAR --}}
+        <div id="form-bulk" style="display:none">
+            <div class="bg-blue-50 border border-blue-100 rounded-xl p-3 mb-4 text-xs text-blue-700">
+                <i class="fa-solid fa-circle-info mr-1"></i>
+                Har qavatda <strong>bitta</strong> xonadon yaratiladi.
+                Raqamlar ketma-ket: 1, 2, 3, 4...
+            </div>
+            <div class="grid grid-cols-2 gap-3 mb-4">
                 <div>
-                    <label class="text-sm font-medium text-gray-700 block mb-1">Xonadon raqami *</label>
-                    <input name="number" type="text" placeholder="101" class="form-input" required>
+                    <label class="text-sm font-medium text-gray-700 block mb-1">Qavat: dan *</label>
+                    <input id="b-floor-from" type="number" min="1" max="100" placeholder="2"
+                           class="form-input" value="2" oninput="previewNumbers()">
                 </div>
                 <div>
-                    <label class="text-sm font-medium text-gray-700 block mb-1">Qavat *</label>
-                    <input name="floor" type="number" min="1" max="50" class="form-input" required>
+                    <label class="text-sm font-medium text-gray-700 block mb-1">Qavat: gacha *</label>
+                    <input id="b-floor-to" type="number" min="1" max="100" placeholder="9"
+                           class="form-input" value="{{ $block->total_floors }}" oninput="previewNumbers()">
+                </div>
+                <div class="col-span-2">
+                    <label class="text-sm font-medium text-gray-700 block mb-1">
+                        Boshlang'ich raqam *
+                        <span class="text-gray-400 font-normal ml-1">— 1 dan boshlansa 1 kiriting</span>
+                    </label>
+                    <input id="b-start" type="number" min="1" placeholder="1"
+                           class="form-input" oninput="previewNumbers()">
                 </div>
                 <div>
                     <label class="text-sm font-medium text-gray-700 block mb-1">Xonalar soni *</label>
-                    <input name="rooms" type="number" min="1" max="10" class="form-input" required>
+                    <input id="b-rooms" type="number" min="1" max="10" class="form-input">
                 </div>
-                <div>
+                <div class="col-span-2">
                     <label class="text-sm font-medium text-gray-700 block mb-1">Maydon (m²) *</label>
-                    <input name="area_total" type="number" step="0.01" min="10" class="form-input" required>
+                    <input id="b-area" type="number" step="0.01" min="10" class="form-input">
                 </div>
                 <div>
                     <label class="text-sm font-medium text-gray-700 block mb-1">
-                        <span class="inline-flex items-center gap-1.5">
-                            <span class="w-2.5 h-2.5 bg-amber-400 rounded-full"></span>
-                            Karobka narxi (so'm) *
-                        </span>
+                        <span class="w-2.5 h-2.5 bg-amber-400 rounded-full inline-block mr-1"></span>
+                        Karobka narxi *
                     </label>
-                    <input name="total_price" type="number" step="1000" min="1000"
-                           placeholder="Ta'mirsiz narx" class="form-input" required>
+                    <input id="b-price" type="number" step="1000" min="1000" class="form-input">
                 </div>
                 <div>
                     <label class="text-sm font-medium text-gray-700 block mb-1">
-                        <span class="inline-flex items-center gap-1.5">
-                            <span class="w-2.5 h-2.5 bg-emerald-500 rounded-full"></span>
-                            Podklyuch narxi (so'm)
-                        </span>
+                        <span class="w-2.5 h-2.5 bg-emerald-500 rounded-full inline-block mr-1"></span>
+                        Podklyuch narxi
                     </label>
-                    <input name="price_podklyuch" type="number" step="1000" min="1000"
-                           placeholder="Tayyor ta'mir narxi" class="form-input">
+                    <input id="b-price-p" type="number" step="1000" min="1000" class="form-input" placeholder="(ixtiyoriy)">
+                </div>
+                <div class="col-span-2">
+                    <div id="bulk-preview" class="text-xs text-gray-400 mt-1 hidden">
+                        Yaratiladi: <span id="preview-numbers" class="font-mono text-emerald-600 font-semibold"></span>
+                    </div>
                 </div>
             </div>
             <div class="flex gap-3 justify-end">
                 <button type="button" onclick="closeModal()" class="btn-secondary">Bekor</button>
-                <button type="submit" class="btn-primary">
-                    <i class="fa-solid fa-plus"></i> Qo'shish
+                <button type="button" onclick="submitBulk()" id="bulk-submit-btn" class="btn-primary">
+                    <i class="fa-solid fa-layer-group"></i> Barchasini yaratish
                 </button>
             </div>
-        </form>
+        </div>
     </div>`);
+}
+
+function switchMode(mode) {
+    document.getElementById('form-single').style.display = mode === 'single' ? 'block' : 'none';
+    document.getElementById('form-bulk').style.display   = mode === 'bulk'   ? 'block' : 'none';
+    document.getElementById('mode-single').className = mode === 'single'
+        ? 'flex-1 py-2 rounded-lg text-sm font-semibold transition bg-white shadow text-gray-800'
+        : 'flex-1 py-2 rounded-lg text-sm font-semibold transition text-gray-500 hover:text-gray-700';
+    document.getElementById('mode-bulk').className = mode === 'bulk'
+        ? 'flex-1 py-2 rounded-lg text-sm font-semibold transition bg-white shadow text-gray-800'
+        : 'flex-1 py-2 rounded-lg text-sm font-semibold transition text-gray-500 hover:text-gray-700';
+}
+
+function previewNumbers() {
+    const from  = parseInt(document.getElementById('b-floor-from')?.value) || 0;
+    const to    = parseInt(document.getElementById('b-floor-to')?.value)   || 0;
+    const start = parseInt(document.getElementById('b-start')?.value)      || 0;
+    const prev  = document.getElementById('bulk-preview');
+    const nums  = document.getElementById('preview-numbers');
+    if (!start || from < 1 || to < from) { prev?.classList.add('hidden'); return; }
+    const list = [];
+    let n = start;
+    for (let f = from; f <= to; f++, n++) list.push(n);
+    nums.textContent = list.join(', ');
+    prev?.classList.remove('hidden');
+}
+
+async function submitBulk() {
+    const from   = parseInt(document.getElementById('b-floor-from')?.value);
+    const to     = parseInt(document.getElementById('b-floor-to')?.value);
+    const start  = parseInt(document.getElementById('b-start')?.value);
+    const rooms  = parseInt(document.getElementById('b-rooms')?.value);
+    const area   = parseFloat(document.getElementById('b-area')?.value);
+    const price  = parseFloat(document.getElementById('b-price')?.value);
+    const pricep = parseFloat(document.getElementById('b-price-p')?.value) || null;
+
+    if (!from || !to || !start || !rooms || !area || !price) {
+        showToast("Barcha majburiy maydonlarni to'ldiring!", 'error'); return;
+    }
+
+    const btn = document.getElementById('bulk-submit-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i>Yaratilmoqda...';
+
+    const res = await fetch('/apartments/bulk', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json' },
+        body: JSON.stringify({
+            block_id: {{ $block->id }},
+            floor_from: from, floor_to: to,
+            number_start: start,
+            rooms, area_total: area,
+            total_price: price,
+            price_podklyuch: pricep,
+        }),
+    });
+    const d = await res.json();
+
+    if (d.success) {
+        showToast(d.message, 'success');
+        closeModal();
+        setTimeout(() => location.reload(), 700);
+    } else {
+        const err = d.errors ? Object.values(d.errors).flat().join('\n') : (d.message ?? 'Xatolik');
+        showToast(err, 'error');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-layer-group mr-2"></i>Barchasini yaratish';
+    }
+}
+
+function openEditApartmentModal(apt) {
+    openModal(`
+    <div class="p-6">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-bold">#${apt.number} — Tahrirlash</h3>
+            <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600 text-xl">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        <div class="grid grid-cols-2 gap-3 mb-4">
+            <div>
+                <label class="text-sm font-medium text-gray-700 block mb-1">Xonalar soni</label>
+                <input id="ea-rooms" type="number" min="1" max="10" class="form-input" value="${apt.rooms}">
+            </div>
+            <div>
+                <label class="text-sm font-medium text-gray-700 block mb-1">Maydon (m²)</label>
+                <input id="ea-area" type="number" step="0.01" min="10" class="form-input" value="${apt.area_total}">
+            </div>
+            <div>
+                <label class="text-sm font-medium text-gray-700 block mb-1">
+                    <span class="w-2.5 h-2.5 bg-amber-400 rounded-full inline-block mr-1"></span>
+                    Karobka narxi
+                </label>
+                <input id="ea-price" type="number" step="1000" min="1000" class="form-input" value="${apt.total_price}">
+            </div>
+            <div>
+                <label class="text-sm font-medium text-gray-700 block mb-1">
+                    <span class="w-2.5 h-2.5 bg-emerald-500 rounded-full inline-block mr-1"></span>
+                    Podklyuch narxi
+                </label>
+                <input id="ea-price-p" type="number" step="1000" min="1000" class="form-input"
+                       value="${apt.price_podklyuch || ''}" placeholder="(ixtiyoriy)">
+            </div>
+            <div class="col-span-2">
+                <label class="text-sm font-medium text-gray-700 block mb-1">Izoh</label>
+                <input id="ea-notes" type="text" class="form-input" value="${apt.notes || ''}">
+            </div>
+        </div>
+        <div class="flex gap-3 justify-end">
+            <button type="button" onclick="closeModal()" class="btn-secondary">Bekor</button>
+            <button type="button" onclick="saveApartment(${apt.id})" class="btn-primary">
+                <i class="fa-solid fa-floppy-disk"></i> Saqlash
+            </button>
+        </div>
+    </div>`);
+}
+
+async function saveApartment(id) {
+    const rooms  = document.getElementById('ea-rooms')?.value;
+    const area   = document.getElementById('ea-area')?.value;
+    const price  = document.getElementById('ea-price')?.value;
+    const pricep = document.getElementById('ea-price-p')?.value || null;
+    const notes  = document.getElementById('ea-notes')?.value || null;
+
+    const res = await fetch(`/apartments/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json' },
+        body: JSON.stringify({ rooms: parseInt(rooms), area_total: parseFloat(area),
+                               total_price: parseFloat(price), price_podklyuch: pricep ? parseFloat(pricep) : null, notes }),
+    });
+    const d = await res.json();
+    if (d.success) {
+        showToast("Xonadon yangilandi", 'success');
+        closeModal();
+        setTimeout(() => location.reload(), 600);
+    } else {
+        showToast(d.message ?? 'Xatolik', 'error');
+    }
+}
+
+async function deleteApartment(id, number) {
+    if (!confirm(`#${number} xonadonni o'chirishni tasdiqlaysizmi?\n\nDiqqat: agar shartnoma bo'lsa o'chirilmaydi!`)) return;
+    const res = await fetch(`/apartments/${id}`, {
+        method: 'DELETE',
+        headers: { 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json' },
+    });
+    const d = await res.json();
+    showToast(d.message, d.success ? 'success' : 'error');
+    if (d.success) setTimeout(() => location.reload(), 600);
 }
 </script>
 @endpush

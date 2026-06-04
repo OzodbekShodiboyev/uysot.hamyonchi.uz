@@ -126,6 +126,105 @@ class ApartmentController extends Controller
         return back()->with('success', 'Xonadon yangilandi.');
     }
 
+    // Ko'p qavatlar uchun bir vaqtda xonadon yaratish (admin)
+    public function bulkStore(Request $request): JsonResponse
+    {
+        if (!auth()->user()->isAdmin()) {
+            return response()->json(['success' => false, 'message' => 'Faqat admin uchun.'], 403);
+        }
+
+        $data = $request->validate([
+            'block_id'        => ['required', 'integer', 'exists:blocks,id'],
+            'floor_from'      => ['required', 'integer', 'min:1', 'max:100'],
+            'floor_to'        => ['required', 'integer', 'min:1', 'max:100', 'gte:floor_from'],
+            'number_start'    => ['required', 'integer', 'min:1'],
+            'entrance'        => ['nullable', 'integer', 'min:1'],
+            'rooms'           => ['required', 'integer', 'min:1', 'max:10'],
+            'area_total'      => ['required', 'numeric', 'min:10'],
+            'area_living'     => ['nullable', 'numeric', 'min:1'],
+            'area_kitchen'    => ['nullable', 'numeric', 'min:1'],
+            'total_price'     => ['required', 'numeric', 'min:1000'],
+            'price_podklyuch' => ['nullable', 'numeric', 'min:1000'],
+            'price_per_m2'    => ['nullable', 'numeric', 'min:0'],
+        ]);
+
+        $created = [];
+        $skipped = [];
+        $num = (int) $data['number_start'];
+
+        for ($floor = $data['floor_from']; $floor <= $data['floor_to']; $floor++, $num++) {
+            $number = (string) $num;
+
+            $exists = Apartment::where('block_id', $data['block_id'])
+                ->where('number', $number)
+                ->exists();
+
+            if ($exists) {
+                $skipped[] = $number;
+                continue;
+            }
+
+            $apt = Apartment::create([
+                'block_id'        => $data['block_id'],
+                'number'          => $number,
+                'floor'           => $floor,
+                'entrance'        => $data['entrance'] ?? 1,
+                'rooms'           => $data['rooms'],
+                'area_total'      => $data['area_total'],
+                'area_living'     => $data['area_living'] ?? null,
+                'area_kitchen'    => $data['area_kitchen'] ?? null,
+                'total_price'     => $data['total_price'],
+                'price_podklyuch' => $data['price_podklyuch'] ?? null,
+                'price_per_m2'    => $data['price_per_m2'] ?? null,
+                'renovation'      => 'none',
+                'status'          => 'free',
+            ]);
+
+            $created[] = $apt->number;
+        }
+
+        ActivityLog::log(
+            'apartment.bulk_created',
+            Block::find($data['block_id']),
+            count($created) . " ta xonadon yaratildi: " . implode(', ', $created)
+        );
+
+        $msg = count($created) . " ta xonadon yaratildi.";
+        if ($skipped) {
+            $msg .= " O'tkazib yuborildi (mavjud): " . implode(', ', $skipped);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => $msg,
+            'created' => count($created),
+            'skipped' => $skipped,
+        ]);
+    }
+
+    // Xonadonni o'chirish (faqat admin, faqat shartnomasiz)
+    public function destroy(Apartment $apartment): JsonResponse
+    {
+        if (!auth()->user()->isAdmin()) {
+            return response()->json(['success' => false, 'message' => 'Faqat admin uchun.'], 403);
+        }
+
+        if ($apartment->contracts()->exists()) {
+            return response()->json([
+                'success' => false,
+                'message' => "#{$apartment->number} xonadonda shartnoma mavjud. O'chirib bo'lmaydi.",
+            ], 422);
+        }
+
+        $number = $apartment->number;
+        $apartment->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => "#{$number} xonadon o'chirildi.",
+        ]);
+    }
+
     // Vaqtinchalik band qilish
     public function reserve(Apartment $apartment, Request $request): JsonResponse
     {

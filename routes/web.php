@@ -48,7 +48,9 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('/',                           [ApartmentController::class, 'index'])->name('index');
         Route::get('/block/{block}',              [ApartmentController::class, 'block'])->name('block');
         Route::post('/',                          [ApartmentController::class, 'store'])->name('store');
+        Route::post('/bulk',                      [ApartmentController::class, 'bulkStore'])->name('bulk');
         Route::put('/{apartment}',                [ApartmentController::class, 'update'])->name('update');
+        Route::delete('/{apartment}',             [ApartmentController::class, 'destroy'])->name('destroy');
         Route::post('/{apartment}/reserve',       [ApartmentController::class, 'reserve'])->name('reserve');
         Route::post('/{apartment}/release',       [ApartmentController::class, 'release'])->name('release');
     });
