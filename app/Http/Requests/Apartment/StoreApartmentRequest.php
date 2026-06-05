@@ -17,7 +17,7 @@ class StoreApartmentRequest extends FormRequest
             'block_id'     => ['required', 'integer', 'exists:blocks,id'],
             'owner_id'     => ['nullable', 'integer', 'exists:owners,id'],
             'number'       => ['required', 'string', 'max:20'],
-            'floor'        => ['required', 'integer', 'min:1', 'max:50'],
+            'floor'        => ['required', 'integer', 'min:1', 'max:100'],
             'entrance'     => ['nullable', 'integer', 'min:1', 'max:20'],
             'rooms'        => ['required', 'integer', 'min:1', 'max:10'],
             'area_total'   => ['required', 'numeric', 'min:10', 'max:1000'],

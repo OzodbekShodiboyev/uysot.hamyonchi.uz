@@ -139,8 +139,8 @@ class ApartmentController extends Controller
             'block_id'          => ['required', 'integer', 'exists:blocks,id'],
             'floor_from'        => ['required', 'integer', 'min:1', 'max:100'],
             'floor_to'          => ['required', 'integer', 'min:1', 'max:100', 'gte:floor_from'],
-            'number_start'      => ['required', 'integer', 'min:1'],
             'apts_per_floor'    => ['required', 'integer', 'min:1', 'max:20'],
+            'position'          => ['required', 'integer', 'min:1', 'lte:apts_per_floor'],
             'entrance'          => ['nullable', 'integer', 'min:1'],
             'rooms'             => ['required', 'integer', 'min:1', 'max:10'],
             'area_total'        => ['required', 'numeric', 'min:10'],
@@ -153,55 +153,57 @@ class ApartmentController extends Controller
             'price_per_m2'         => ['nullable', 'numeric', 'min:0'],
         ]);
 
-        $created = [];
-        $skipped = [];
-        $num     = (int) $data['number_start'];
+        $created  = [];
+        $skipped  = [];
         $perFloor = (int) $data['apts_per_floor'];
+        $position = (int) $data['position'];
 
-        for ($floor = $data['floor_from']; $floor <= $data['floor_to']; $floor++) {
-            for ($i = 0; $i < $perFloor; $i++, $num++) {
-                $number = (string) $num;
+        try {
+            for ($floor = $data['floor_from']; $floor <= $data['floor_to']; $floor++) {
+                // Raqam = (qavat - 1) × qavatdagi_jami_xonadon + pozitsiya
+                $number = (string) (($floor - 1) * $perFloor + $position);
 
-                $exists = Apartment::where('block_id', $data['block_id'])
-                    ->where('number', $number)
-                    ->exists();
-
-                if ($exists) {
+                if (Apartment::where('block_id', $data['block_id'])->where('number', $number)->exists()) {
                     $skipped[] = $number;
                     continue;
                 }
 
-                $apt = Apartment::create([
+                Apartment::create([
                     'block_id'             => $data['block_id'],
                     'number'               => $number,
                     'floor'                => $floor,
                     'entrance'             => $data['entrance'] ?? 1,
                     'rooms'                => $data['rooms'],
                     'area_total'           => $data['area_total'],
-                    'area_living'          => $data['area_living'] ?? null,
-                    'area_kitchen'         => $data['area_kitchen'] ?? null,
                     'total_price'          => $data['total_price'],
-                    'price_podklyuch'      => $data['price_podklyuch'] ?? null,
-                    'price_karobka_full'   => $data['price_karobka_full'] ?? null,
-                    'price_podklyuch_full' => $data['price_podklyuch_full'] ?? null,
-                    'price_per_m2'         => $data['price_per_m2'] ?? null,
+                    'price_podklyuch'      => !empty($data['price_podklyuch']) ? $data['price_podklyuch'] : null,
+                    'price_karobka_full'   => !empty($data['price_karobka_full']) ? $data['price_karobka_full'] : null,
+                    'price_podklyuch_full' => !empty($data['price_podklyuch_full']) ? $data['price_podklyuch_full'] : null,
                     'renovation'           => 'none',
                     'status'               => 'free',
                 ]);
 
-                $created[] = $apt->number;
-            }  // inner for (apt per floor)
-        }  // outer for (floors)
+                $created[] = $number;
+            }
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Xatolik: ' . $e->getMessage(),
+            ], 500);
+        }
 
-        ActivityLog::log(
-            'apartment.bulk_created',
-            Block::find($data['block_id']),
-            count($created) . " ta xonadon yaratildi: " . implode(', ', $created)
-        );
+        if ($created) {
+            ActivityLog::log(
+                'apartment.bulk_created',
+                Block::find($data['block_id']),
+                count($created) . " ta xonadon yaratildi"
+            );
+        }
 
         $msg = count($created) . " ta xonadon yaratildi.";
         if ($skipped) {
-            $msg .= " O'tkazib yuborildi (mavjud): " . implode(', ', $skipped);
+            $msg .= " Mavjud (o'tkazildi): " . implode(', ', array_slice($skipped, 0, 10));
+            if (count($skipped) > 10) $msg .= '...';
         }
 
         return response()->json([

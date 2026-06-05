@@ -174,6 +174,28 @@
                     </label>
                 </div>
 
+                {{-- Tier tavsiya banneri --}}
+                <div x-show="autoTierSuggestion" x-cloak class="mt-2">
+                    <div class="rounded-xl p-3 text-xs flex items-center justify-between gap-2"
+                         :class="autoTierSuggestion === 'high'
+                                 ? 'bg-emerald-50 border border-emerald-200 text-emerald-800'
+                                 : 'bg-blue-50 border border-blue-200 text-blue-800'">
+                        <span>
+                            <i class="fa-solid fa-circle-info mr-1"></i>
+                            <template x-if="autoTierSuggestion === 'high'">
+                                <span>Boshlang'ich to'lov 75% dan oshdi — arzonroq narxga o'tish mumkin</span>
+                            </template>
+                            <template x-if="autoTierSuggestion === 'low'">
+                                <span>Boshlang'ich to'lov 75% dan kam — to'g'ri narx: 0–70% avans</span>
+                            </template>
+                        </span>
+                        <button type="button" @click="selectTier(autoTierSuggestion); autoTierSuggestion=''"
+                                class="shrink-0 font-semibold underline hover:no-underline">
+                            O'tish
+                        </button>
+                    </div>
+                </div>
+
                 {{-- Step 2: Avans foizi (faqat alohida narx bor bo'lsa) --}}
                 <div x-show="renovationType && hasFullPrices()" x-cloak
                      class="mt-3 border border-gray-100 rounded-xl p-3 bg-gray-50">
@@ -383,7 +405,8 @@ function contractForm() {
         submitting:     false,
         payMode:        'full',
         renovationType:     '',
-        priceTier:          '',   // 'low' = 0-70%, 'high' = 75-100%
+        priceTier:          '',        // 'low' = 0-70%, 'high' = 75-100%
+        autoTierSuggestion: '',        // tavsiya qilingan tier
         priceKarobka:       {{ isset($apartment) ? (float)$apartment->total_price : 0 }},
         pricePodklyuch:     {{ isset($apartment) ? (float)($apartment->price_podklyuch ?? 0) : 0 }},
         priceKarobkaFull:   {{ isset($apartment) ? (float)($apartment->price_karobka_full ?? 0) : 0 }},
@@ -415,12 +438,26 @@ function contractForm() {
             const init = this.payMode === 'with_init' ? this.form.initial_payment : 0;
             const rem  = Math.max(0, fp - init);
             const ms   = this.form.installment_months || 1;
+            const pct  = fp > 0 ? Math.round((init / fp) * 100 * 10) / 10 : 0;
+
             this.calc_result = {
                 finalPrice: fp,
-                initPct:    fp > 0 ? Math.round((init / fp) * 100 * 10) / 10 : 0,
+                initPct:    pct,
                 remaining:  rem,
                 monthly:    this.payMode !== 'full' && ms > 0 ? Math.round(rem / ms) : 0,
             };
+
+            // Avtomatic tier tavsiya: boshlang'ich tolov >= 75% bo'lsa
+            if (this.hasFullPrices() && this.payMode === 'with_init' && pct > 0) {
+                const suggestedTier = pct >= 75 ? 'high' : 'low';
+                if (suggestedTier !== this.priceTier) {
+                    this.autoTierSuggestion = suggestedTier;
+                } else {
+                    this.autoTierSuggestion = '';
+                }
+            } else {
+                this.autoTierSuggestion = '';
+            }
         },
 
         hasFullPrices() {
@@ -445,8 +482,13 @@ function contractForm() {
 
         selectRenovation(type) {
             this.renovationType = type;
-            // Agar faqat bir narx tier bo'lsa — avtomatik tanlash
-            if (!this.hasFullPrices()) this.priceTier = 'low';
+            // Agar full narx yo'q — low tier
+            // Agar payMode === full — high tier (to'liq to'lov = 100% avans)
+            if (!this.hasFullPrices()) {
+                this.priceTier = 'low';
+            } else if (this.payMode === 'full') {
+                this.priceTier = 'high';
+            }
             this.applyPrice();
         },
 
