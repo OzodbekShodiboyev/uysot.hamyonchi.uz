@@ -53,9 +53,10 @@
                                 data-price="{{ $apt->total_price }}"
                                 data-price-podklyuch="{{ $apt->price_podklyuch ?? '' }}"
                                 data-price-karobka-full="{{ $apt->price_karobka_full ?? '' }}"
-                                data-price-podklyuch-full="{{ $apt->price_podklyuch_full ?? '' }}">
-                            {{ $apt->number }}-xonadon · {{ $apt->floor }}-qavat · {{ $apt->rooms }}x ·
-                            {{ number_format($apt->total_price) }} so'm@if($apt->price_podklyuch) / {{ number_format($apt->price_podklyuch) }} so'm@endif
+                                data-price-podklyuch-full="{{ $apt->price_podklyuch_full ?? '' }}"
+                                data-area="{{ $apt->area_total }}">
+                            {{ $apt->number }}-xonadon · {{ $apt->floor }}-qavat · {{ $apt->rooms }}x · {{ $apt->area_total }}m² ·
+                            {{ number_format($apt->total_price) }} so'm/m²@if($apt->price_podklyuch) / {{ number_format($apt->price_podklyuch) }} so'm/m²@endif
                         </option>
                         @endforeach
                     </optgroup>
@@ -209,7 +210,9 @@
                             <p class="text-xs font-bold text-gray-700">0 – 70%</p>
                             <p class="text-[10px] text-gray-400 mb-1">Bo'lib to'lash / kam avans</p>
                             <p class="text-xs font-bold text-blue-700"
-                               x-text="(renovationType === 'podklyuch' ? (pricePodklyuch > 0 ? Number(pricePodklyuch).toLocaleString('uz-UZ') : '—') : Number(priceKarobka).toLocaleString('uz-UZ')) + &quot; so'm&quot;"></p>
+                               x-text="(renovationType === 'podklyuch' ? (pricePodklyuch > 0 ? Number(pricePodklyuch).toLocaleString('uz-UZ') : '—') : Number(priceKarobka).toLocaleString('uz-UZ')) + &quot; so'm/m²&quot;"></p>
+                            <p x-show="areaTotal > 0" class="text-[10px] text-blue-500 mt-0.5"
+                               x-text="'= ' + Number(Math.round((renovationType==='podklyuch' ? (pricePodklyuch||priceKarobka) : priceKarobka) * areaTotal)).toLocaleString('uz-UZ') + &quot; so'm&quot;"></p>
                         </button>
                         <button type="button" @click="selectTier('high')"
                                 class="p-3 rounded-xl border-2 text-left transition"
@@ -217,7 +220,9 @@
                             <p class="text-xs font-bold text-gray-700">75 – 100%</p>
                             <p class="text-[10px] text-gray-400 mb-1">Yuqori avans / to'liq</p>
                             <p class="text-xs font-bold text-emerald-700"
-                               x-text="(renovationType === 'podklyuch' ? (pricePodklyuchFull > 0 ? Number(pricePodklyuchFull).toLocaleString('uz-UZ') : '—') : (priceKarobkaFull > 0 ? Number(priceKarobkaFull).toLocaleString('uz-UZ') : '—')) + &quot; so'm&quot;"></p>
+                               x-text="(renovationType === 'podklyuch' ? (pricePodklyuchFull > 0 ? Number(pricePodklyuchFull).toLocaleString('uz-UZ') : '—') : (priceKarobkaFull > 0 ? Number(priceKarobkaFull).toLocaleString('uz-UZ') : '—')) + &quot; so'm/m²&quot;"></p>
+                            <p x-show="areaTotal > 0" class="text-[10px] text-emerald-600 mt-0.5"
+                               x-text="(renovationType==='podklyuch' ? (pricePodklyuchFull > 0 ? '= ' + Number(Math.round(pricePodklyuchFull * areaTotal)).toLocaleString('uz-UZ') + &quot; so'm&quot; : '—') : (priceKarobkaFull > 0 ? '= ' + Number(Math.round(priceKarobkaFull * areaTotal)).toLocaleString('uz-UZ') + &quot; so'm&quot; : '—'))"></p>
                         </button>
                     </div>
                 </div>
@@ -307,7 +312,7 @@
                 {{-- Hisob-kitob xulosasi --}}
                 <div x-show="form.total_price > 0" x-cloak
                      class="mt-4 bg-gray-50 border border-gray-100 rounded-xl p-4 space-y-2 text-sm">
-                    <div class="flex justify-between items-center">
+                    <div class="flex justify-between items-start">
                         <span class="text-gray-500 flex items-center gap-1.5">
                             Narx
                             <span class="px-1.5 py-0.5 rounded-full text-[10px] font-semibold"
@@ -317,7 +322,12 @@
                                   x-text="renovationType==='podklyuch' ? 'Podklyuch' : 'Karobka'">
                             </span>
                         </span>
-                        <span x-text="Number(form.total_price).toLocaleString('uz-UZ') + &quot; so'm&quot;"></span>
+                        <span class="text-right">
+                            <span x-text="Number(form.total_price).toLocaleString('uz-UZ') + &quot; so'm&quot;" class="font-semibold"></span>
+                            <span x-show="areaTotal > 0 && pricePerM2Chosen > 0"
+                                  class="block text-[10px] text-gray-400"
+                                  x-text="Number(pricePerM2Chosen).toLocaleString('uz-UZ') + &quot; × &quot; + areaTotal + &quot; m²&quot;"></span>
+                        </span>
                     </div>
                     <div x-show="form.discount_amount > 0" class="flex justify-between">
                         <span class="text-gray-500">Chegirma</span>
@@ -406,7 +416,9 @@ function contractForm() {
         payMode:        'full',
         renovationType:     '',
         priceTier:          '',        // 'low' = 0-70%, 'high' = 75-100%
-        autoTierSuggestion: '',        // tavsiya qilingan tier
+        autoTierSuggestion: '',
+        areaTotal:          {{ isset($apartment) ? (float)$apartment->area_total : 0 }},
+        pricePerM2Chosen:   0,         // tanlangan narx/m² (kalkulator ko'rinishi uchun)
         priceKarobka:       {{ isset($apartment) ? (float)$apartment->total_price : 0 }},
         pricePodklyuch:     {{ isset($apartment) ? (float)($apartment->price_podklyuch ?? 0) : 0 }},
         priceKarobkaFull:   {{ isset($apartment) ? (float)($apartment->price_karobka_full ?? 0) : 0 }},
@@ -467,15 +479,18 @@ function contractForm() {
         applyPrice() {
             if (!this.renovationType) return;
             const isHigh = this.priceTier === 'high';
+            let pm2 = 0;
             if (this.renovationType === 'podklyuch') {
                 const full = this.pricePodklyuchFull;
                 const low  = this.pricePodklyuch;
-                this.form.total_price = (isHigh && full > 0) ? full : (low > 0 ? low : this.priceKarobka);
+                pm2 = (isHigh && full > 0) ? full : (low > 0 ? low : this.priceKarobka);
             } else {
                 const full = this.priceKarobkaFull;
                 const low  = this.priceKarobka;
-                this.form.total_price = (isHigh && full > 0) ? full : low;
+                pm2 = (isHigh && full > 0) ? full : low;
             }
+            this.pricePerM2Chosen     = pm2;
+            this.form.total_price     = this.areaTotal > 0 ? Math.round(pm2 * this.areaTotal) : pm2;
             this.form.discount_amount = 0;
             this.calc();
         },
@@ -503,6 +518,8 @@ function contractForm() {
             this.pricePodklyuch     = parseFloat(opt?.dataset.pricePodklyuch ?? 0);
             this.priceKarobkaFull   = parseFloat(opt?.dataset.priceKarobkaFull ?? 0);
             this.pricePodklyuchFull = parseFloat(opt?.dataset.pricePodklyuchFull ?? 0);
+            this.areaTotal          = parseFloat(opt?.dataset.area ?? 0);
+            this.pricePerM2Chosen   = 0;
             this.renovationType     = '';
             this.priceTier          = '';
             this.form.total_price   = 0;
