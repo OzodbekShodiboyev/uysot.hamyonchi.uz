@@ -287,6 +287,17 @@ function blockPage() {
             }
 
             @if(auth()->user()->isAdmin())
+            // Admin: sotilgan belgilash (faqat bo'sh/band xonadonlar uchun, shartnoma yo'q bo'lsa)
+            if (apt.status === 'free' || apt.status === 'reserved') {
+                html += `
+                <button onclick="markAptSold(${apt.id}, '${apt.number}')"
+                        class="w-full flex items-center justify-center gap-2 border border-gray-300
+                               text-gray-600 bg-gray-50 py-2 rounded-xl text-sm font-medium
+                               hover:bg-gray-100 transition">
+                    <i class="fa-solid fa-tag"></i> Sotilgan deb belgilash
+                </button>`;
+            }
+
             // Admin: tahrirlash va o'chirish
             html += `
             <div class="flex gap-2 pt-1 border-t border-gray-100 mt-1">
@@ -647,6 +658,13 @@ async function saveApartment(id) {
     } else {
         showToast(d.message ?? 'Xatolik', 'error');
     }
+}
+
+async function markAptSold(id, number) {
+    if (!confirm(`#${number} xonadonni "Sotilgan" deb belgilashni tasdiqlaysizmi?\n(Shartnoma yaratilmaydi)`)) return;
+    const d = await apiPost(`/apartments/${id}/mark-sold`);
+    showToast(d.message, d.success ? 'success' : 'error');
+    if (d.success) setTimeout(() => location.reload(), 600);
 }
 
 async function deleteApartment(id, number) {

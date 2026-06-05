@@ -257,6 +257,27 @@ class ApartmentController extends Controller
         }
     }
 
+    // Xonadonni "Sotilgan" deb belgilash (admin, shartnomasiz)
+    public function markSold(Apartment $apartment): JsonResponse
+    {
+        if (!auth()->user()->isAdmin()) {
+            return response()->json(['success' => false, 'message' => 'Faqat admin uchun.'], 403);
+        }
+
+        $apartment->update(['status' => 'sold']);
+
+        ActivityLog::log(
+            'apartment.marked_sold',
+            $apartment,
+            "Xonadon #{$apartment->number} sotilgan deb belgilandi (shartnomasiz)"
+        );
+
+        return response()->json([
+            'success' => true,
+            'message' => "#{$apartment->number} sotilgan deb belgilandi.",
+        ]);
+    }
+
     // Bandlikni bekor qilish
     public function release(Apartment $apartment): JsonResponse
     {

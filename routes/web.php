@@ -53,6 +53,7 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::delete('/{apartment}',             [ApartmentController::class, 'destroy'])->name('destroy');
         Route::post('/{apartment}/reserve',       [ApartmentController::class, 'reserve'])->name('reserve');
         Route::post('/{apartment}/release',       [ApartmentController::class, 'release'])->name('release');
+        Route::post('/{apartment}/mark-sold',     [ApartmentController::class, 'markSold'])->name('markSold');
     });
 
     // ─── Shartnomalar ─────────────────────────────────────
