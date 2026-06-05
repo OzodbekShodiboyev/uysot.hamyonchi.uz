@@ -407,13 +407,13 @@ function openAddApartmentModal() {
         <div id="form-bulk" style="display:none">
             <div class="bg-blue-50 border border-blue-100 rounded-xl p-3 mb-4 text-xs text-blue-700">
                 <i class="fa-solid fa-circle-info mr-1"></i>
-                Har qavatda <b>1 ta</b> shu turdagi xonadon yaratiladi. Raqam: <code>(qavat−1) × jami + pozitsiya</code>
+                Har qavatda <b>1 ta</b> shu turdagi xonadon yaratiladi. Raqam: <code>(qavat − birinchi qavat) × jami + pozitsiya</code>
             </div>
             <div class="grid grid-cols-2 gap-3 mb-4">
                 <div>
                     <label class="text-sm font-medium text-gray-700 block mb-1">Qavat: dan *</label>
-                    <input id="b-floor-from" type="number" min="1" max="100" placeholder="1"
-                           class="form-input" value="1" oninput="previewNumbers()">
+                    <input id="b-floor-from" type="number" min="1" max="100" placeholder="2"
+                           class="form-input" value="2" oninput="previewNumbers()">
                 </div>
                 <div>
                     <label class="text-sm font-medium text-gray-700 block mb-1">Qavat: gacha *</label>
@@ -422,7 +422,15 @@ function openAddApartmentModal() {
                 </div>
                 <div>
                     <label class="text-sm font-medium text-gray-700 block mb-1">
-                        Qavatdagi jami xonadon soni *
+                        Birinchi turar qavat *
+                        <span class="text-gray-400 font-normal" style="font-size:10px;">— raqamlash boshlanadigon qavat</span>
+                    </label>
+                    <input id="b-first-floor" type="number" min="1" max="100" placeholder="2"
+                           class="form-input" value="2" oninput="previewNumbers()">
+                </div>
+                <div>
+                    <label class="text-sm font-medium text-gray-700 block mb-1">
+                        Qavatdagi jami xonadon *
                         <span class="text-gray-400 font-normal" style="font-size:10px;">— bino bo'yicha</span>
                     </label>
                     <input id="b-per-floor" type="number" min="1" max="20" placeholder="5"
@@ -494,19 +502,20 @@ function switchMode(mode) {
 }
 
 function previewNumbers() {
-    const from     = parseInt(document.getElementById('b-floor-from')?.value)  || 0;
-    const to       = parseInt(document.getElementById('b-floor-to')?.value)    || 0;
-    const perFloor = parseInt(document.getElementById('b-per-floor')?.value)   || 0;
-    const position = parseInt(document.getElementById('b-position')?.value)    || 0;
+    const from       = parseInt(document.getElementById('b-floor-from')?.value)   || 0;
+    const to         = parseInt(document.getElementById('b-floor-to')?.value)     || 0;
+    const firstFloor = parseInt(document.getElementById('b-first-floor')?.value)  || 0;
+    const perFloor   = parseInt(document.getElementById('b-per-floor')?.value)    || 0;
+    const position   = parseInt(document.getElementById('b-position')?.value)     || 0;
     const prev = document.getElementById('bulk-preview');
     const nums = document.getElementById('preview-numbers');
-    if (!perFloor || !position || from < 1 || to < from || position > perFloor) {
+    if (!perFloor || !position || !firstFloor || from < 1 || to < from || position > perFloor || firstFloor > from) {
         prev?.classList.add('hidden'); return;
     }
 
     const lines = [];
     for (let f = from; f <= to; f++) {
-        const num = (f - 1) * perFloor + position;
+        const num = (f - firstFloor) * perFloor + position;
         lines.push(`${f}-qavat: <b>${num}</b>`);
     }
     nums.innerHTML = lines.join(' · ');
@@ -514,10 +523,11 @@ function previewNumbers() {
 }
 
 async function submitBulk() {
-    const from     = parseInt(document.getElementById('b-floor-from')?.value);
-    const to       = parseInt(document.getElementById('b-floor-to')?.value);
-    const perFloor = parseInt(document.getElementById('b-per-floor')?.value) || 0;
-    const position = parseInt(document.getElementById('b-position')?.value)  || 0;
+    const from       = parseInt(document.getElementById('b-floor-from')?.value);
+    const to         = parseInt(document.getElementById('b-floor-to')?.value);
+    const firstFloor = parseInt(document.getElementById('b-first-floor')?.value) || 0;
+    const perFloor   = parseInt(document.getElementById('b-per-floor')?.value)   || 0;
+    const position   = parseInt(document.getElementById('b-position')?.value)    || 0;
     const rooms  = parseInt(document.getElementById('b-rooms')?.value);
     const area   = parseFloat(document.getElementById('b-area')?.value);
     const price  = parseFloat(document.getElementById('b-price')?.value);
@@ -525,11 +535,14 @@ async function submitBulk() {
     const pricekf = parseFloat(document.getElementById('b-price-kf')?.value) || null;
     const pricepf = parseFloat(document.getElementById('b-price-pf')?.value) || null;
 
-    if (!from || !to || !perFloor || !position || !rooms || !area || !price) {
+    if (!from || !to || !firstFloor || !perFloor || !position || !rooms || !area || !price) {
         showToast("Barcha majburiy maydonlarni to'ldiring!", 'error'); return;
     }
     if (position > perFloor) {
         showToast(`Pozitsiya (${position}) jami xonadon sonidan (${perFloor}) katta bo'lolmaydi!`, 'error'); return;
+    }
+    if (firstFloor > from) {
+        showToast(`Birinchi turar qavat (${firstFloor}) "dan" qavatidan katta bo'lolmaydi!`, 'error'); return;
     }
 
     const btn = document.getElementById('bulk-submit-btn');
@@ -542,6 +555,7 @@ async function submitBulk() {
         body: JSON.stringify({
             block_id: {{ $block->id }},
             floor_from: from, floor_to: to,
+            first_apt_floor: firstFloor,
             apts_per_floor: perFloor,
             position: position,
             rooms, area_total: area,

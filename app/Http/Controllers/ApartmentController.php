@@ -137,10 +137,11 @@ class ApartmentController extends Controller
 
         $data = $request->validate([
             'block_id'          => ['required', 'integer', 'exists:blocks,id'],
-            'floor_from'        => ['required', 'integer', 'min:1', 'max:100'],
-            'floor_to'          => ['required', 'integer', 'min:1', 'max:100', 'gte:floor_from'],
-            'apts_per_floor'    => ['required', 'integer', 'min:1', 'max:20'],
-            'position'          => ['required', 'integer', 'min:1', 'lte:apts_per_floor'],
+            'floor_from'           => ['required', 'integer', 'min:1', 'max:100'],
+            'floor_to'             => ['required', 'integer', 'min:1', 'max:100', 'gte:floor_from'],
+            'first_apt_floor'      => ['required', 'integer', 'min:1', 'max:100', 'lte:floor_from'],
+            'apts_per_floor'       => ['required', 'integer', 'min:1', 'max:20'],
+            'position'             => ['required', 'integer', 'min:1', 'lte:apts_per_floor'],
             'entrance'          => ['nullable', 'integer', 'min:1'],
             'rooms'             => ['required', 'integer', 'min:1', 'max:10'],
             'area_total'        => ['required', 'numeric', 'min:10'],
@@ -153,15 +154,16 @@ class ApartmentController extends Controller
             'price_per_m2'         => ['nullable', 'numeric', 'min:0'],
         ]);
 
-        $created  = [];
-        $skipped  = [];
-        $perFloor = (int) $data['apts_per_floor'];
-        $position = (int) $data['position'];
+        $created      = [];
+        $skipped      = [];
+        $perFloor     = (int) $data['apts_per_floor'];
+        $position     = (int) $data['position'];
+        $firstAptFloor = (int) $data['first_apt_floor'];
 
         try {
             for ($floor = $data['floor_from']; $floor <= $data['floor_to']; $floor++) {
-                // Raqam = (qavat - 1) × qavatdagi_jami_xonadon + pozitsiya
-                $number = (string) (($floor - 1) * $perFloor + $position);
+                // Raqam = (qavat - birinchi_turar_qavat) × qavatdagi_jami + pozitsiya
+                $number = (string) (($floor - $firstAptFloor) * $perFloor + $position);
 
                 if (Apartment::where('block_id', $data['block_id'])->where('number', $number)->exists()) {
                     $skipped[] = $number;
