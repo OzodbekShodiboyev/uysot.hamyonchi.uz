@@ -93,16 +93,17 @@
                     {{ $floor }}-q
                 </span>
             </div>
-            <div style="display:flex; flex-wrap:wrap; gap:7px;">
+            <div style="display:flex; flex-wrap:wrap; gap:8px;">
                 @foreach($apartments[$floor]->sortBy('number') as $apt)
                 <div class="apt-cell apt-{{ $apt->status }}"
-                     style="padding:7px 10px; min-width:65px; text-align:center;"
+                     style="padding:10px 12px; min-width:82px; text-align:center;"
                      data-apt-id="{{ $apt->id }}"
                      data-status="{{ $apt->status }}"
                      @click="selectApartment({{ $apt->id }})">
-                    <div style="font-size:12px; font-weight:700; line-height:1.2;">{{ $apt->number }}</div>
-                    <div style="font-size:9.5px; opacity:.65; margin-top:2px;">{{ $apt->rooms }}x·{{ $apt->area_total }}m²</div>
-                    <div style="font-size:9.5px; font-weight:600; margin-top:1px;" data-status-label>
+                    <div style="font-size:15px; font-weight:800; line-height:1.2;">{{ $apt->number }}</div>
+                    <div style="font-size:11px; font-weight:600; margin-top:3px;">{{ $apt->rooms }}-xonali</div>
+                    <div style="font-size:10px; opacity:.7; margin-top:1px;">{{ $apt->area_total }} m²</div>
+                    <div style="font-size:9.5px; font-weight:600; margin-top:2px;" data-status-label>
                         {{ $apt->status_label }}
                     </div>
                 </div>
