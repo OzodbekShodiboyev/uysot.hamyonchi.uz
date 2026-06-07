@@ -9,7 +9,14 @@
       "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\OZODBEK\\\\Downloads\\\\uy-sotish-laravel10-php81\\\\uy-sotish\\\\database\\\\migrations\" -Name)",
       "Bash(ls lang/)",
       "Bash(dir lang *)",
-      "Bash(composer show *)"
+      "Bash(composer show *)",
+      "Bash(php -r \"require 'vendor/autoload.php'; echo 'OK';\")",
+      "Read(//e/projects/shaxsiy/express/**)",
+      "Bash(findstr /i \"leads\")",
+      "Bash(php -l \"storage\\\\framework\\\\views\\\\$\\(ls storage\\\\framework\\\\views | sort -t- -k1 -n | tail -1\\)\")"
+    ],
+    "additionalDirectories": [
+      "E:\\projects\\shaxsiy\\express\\resources\\views\\bilet"
     ]
   }
 }

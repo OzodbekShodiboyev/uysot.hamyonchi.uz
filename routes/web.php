@@ -6,6 +6,7 @@ use App\Http\Controllers\{
     ClientController,
     ContractController,
     DashboardController,
+    LeadController,
     PaymentController,
     ReportController,
 };
@@ -76,6 +77,15 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::prefix('payments')->name('payments.')->group(function () {
         Route::get('/',        [PaymentController::class, 'index'])->name('index');
         Route::get('/overdue', [PaymentController::class, 'overdue'])->name('overdue');
+    });
+
+    // ─── CRM — Potensial mijozlar ─────────────────────────
+    Route::prefix('leads')->name('leads.')->group(function () {
+        Route::get('/',                       [LeadController::class, 'index'])->name('index');
+        Route::post('/',                      [LeadController::class, 'store'])->name('store');
+        Route::put('/{lead}',                 [LeadController::class, 'update'])->name('update');
+        Route::delete('/{lead}',              [LeadController::class, 'destroy'])->name('destroy');
+        Route::post('/{lead}/status',         [LeadController::class, 'quickStatus'])->name('quickStatus');
     });
 
     // ─── Hisobotlar ───────────────────────────────────────

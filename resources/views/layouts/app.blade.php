@@ -266,6 +266,17 @@ select.form-input { appearance: auto; }
             @endif
         </a>
 
+        <a href="{{ route('leads.index') }}"
+           class="nav-link {{ request()->routeIs('leads.*') ? 'active' : '' }}">
+            <i class="fa-solid fa-user-plus nav-icon"></i>
+            <span style="flex:1;">CRM</span>
+            @php $hotLeads = \App\Models\Lead::whereIn('status',['new','hot'])->count(); @endphp
+            @if($hotLeads > 0)
+            <span style="background:#ef4444; color:#fff; font-size:9.5px; font-weight:700;
+                         padding:1px 6px; border-radius:99px; flex-shrink:0;">{{ $hotLeads }}</span>
+            @endif
+        </a>
+
         <a href="{{ route('clients.index') }}"
            class="nav-link {{ request()->routeIs('clients.*') ? 'active' : '' }}">
             <i class="fa-solid fa-users nav-icon"></i>
