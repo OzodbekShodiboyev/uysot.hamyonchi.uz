@@ -358,14 +358,23 @@ const LEADS_SOURCES  = @json(\App\Models\Lead::sources());
 const BLOCKS         = @json($blocks->map(fn($b)=>['id'=>(int)$b->id,'name'=>$b->name]));
 const CURRENT_VIEW   = '{{ $view }}';
 
-// ── All leads data embedded ──────────────────────────
-const ALL_LEADS_DATA = {};
-document.querySelectorAll('[data-lead]').forEach(el => {
-    try {
-        const d = JSON.parse(el.dataset.lead);
-        ALL_LEADS_DATA[d.id] = d;
-    } catch(e) {}
-});
+// ── All leads data (server-rendered, safe) ───────────
+@php
+$_leadsForJs = $allLeads->keyBy('id')->map(fn($l) => [
+    'id'                  => $l->id,
+    'full_name'           => $l->full_name,
+    'phone'               => $l->phone,
+    'phone_extra'         => $l->phone_extra ?? '',
+    'source'              => $l->source,
+    'status'              => $l->status,
+    'interested_block_id' => $l->interested_block_id,
+    'rooms'               => $l->rooms,
+    'budget'              => $l->budget ? (float)$l->budget : null,
+    'notes'               => $l->notes ?? '',
+    'next_follow_up'      => $l->next_follow_up?->format('Y-m-d') ?? '',
+]);
+@endphp
+const ALL_LEADS_DATA = @json($_leadsForJs);
 
 // ── Drag & Drop ──────────────────────────────────────
 let draggedId = null;
